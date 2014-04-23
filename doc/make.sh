@@ -7,17 +7,16 @@ SRC=$ROOT/src
 # extension is superfluous
 TEXFILE=template
 XELATEX_OPTS=-halt-on-error
-BIBER_OPTS=""
 
 # sync src to build
-rsync --archive --delete-before --update $SRC/ $BUILD_DIR/
+rsync --archive --delete-before --update --quiet $SRC/ $BUILD_DIR/
 
 # build pdf from tex
 pushd $BUILD_DIR
 xelatex $XELATEX_OPTS -no-pdf $TEXFILE
-#biber $BIBER_OPTS $TEXFILE
+#biber $TEXFILE
 #makeglossaries $TEXFILE
-xelatex $XELATEX_OPTS $TEXFILE
+xelatex $XELATEX_OPTS $TEXFILE > /dev/null
 popd
 
 # mv output
