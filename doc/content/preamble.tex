@@ -1,0 +1,48 @@
+%
+% XeTeX specific
+%
+\usepackage{xltxtra}
+\usepackage{fontspec}
+\usepackage{xunicode}
+
+% math
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% other
+\usepackage{polyglossia}
+\setdefaultlanguage{german}
+\setotherlanguage{english}
+\usepackage{csquotes}
+\usepackage{graphicx}
+
+\usepackage{hyperref}
+\hypersetup{
+            citecolor=cyan,
+            linkcolor=cyan,
+            urlcolor=cyan,
+            filecolor=cyan
+            }
+
+\hypersetup{hidelinks}
+\usepackage[german]{cleveref}
+\usepackage{booktabs}
+
+\usepackage[
+    backend=biber,
+    style=alphabetic-verb
+    ]{biblatex}
+\bibliography{main}
+
+\usepackage[toc]{glossaries}
+\input{glossary}
+\makeglossaries
+
+%
+% Style options
+%
+
+\setsansfont{Linux Biolinum}
+\setmonofont{Droid Sans Mono}

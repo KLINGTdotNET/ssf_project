@@ -9,7 +9,7 @@ TEXFILE=main
 XELATEX_OPTS=-halt-on-error
 
 # sync src to build
-rsync --archive --delete-before --update --quiet $SRC/ $BUILD_DIR/
+rsync --archive --update --quiet $SRC/ $BUILD_DIR/
 
 if [ ! -z $1 ]; then
     TEXFILE = $1
@@ -19,9 +19,8 @@ fi
 # build pdf from tex
 pushd $BUILD_DIR
 xelatex $XELATEX_OPTS -no-pdf $TEXFILE
-if $? == 0; then; return 1; fi
-#biber $TEXFILE
-#makeglossaries $TEXFILE
+biber $TEXFILE
+makeglossaries $TEXFILE
 xelatex $XELATEX_OPTS $TEXFILE > /dev/null
 popd
 
