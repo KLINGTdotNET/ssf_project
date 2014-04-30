@@ -1,20 +1,10 @@
-from io import StringIO
 from lxml import etree
-from pprint import pprint
 
-f = StringIO('''
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-<xsd:element name="a" type="AType"/>
-<xsd:complexType name="AType">
-<xsd:sequence>
-<xsd:element name="b" type="xsd:string" />
-</xsd:sequence>
-</xsd:complexType>
-</xsd:schema>
-''')
+filepath = "/home/andreas/personal/dev/python/ssf_project/resources/facebook.xsd"
+url = 'http://api.facebook.com/1.0/facebook.xsd'
 
-xmlschema_doc = etree.parse(f)
-xmlschema = etree.XMLSchema(xmlschema_doc)
+with open(filepath, 'r') as file:
+    xmlschema_doc = etree.parse(file)
+    xmlschema = etree.XMLSchema(xmlschema_doc)
 
-pprint(dir(xmlschema_doc))
-pprint(dir(xmlschema))
+print(etree.tostring(xmlschema_doc, pretty_print=True))
