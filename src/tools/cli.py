@@ -1,6 +1,8 @@
 import argparse
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError
+from os.path import isdir, exists
 
 def _get_parser():
     parser = argparse.ArgumentParser(
@@ -19,21 +21,41 @@ def _check_args(args):
     """
     Checks if the given arguments are valid
     """
-    return _check_url(args.url) and _check_dest(args.dest)
+    content = _read_url(args.url)
+    args.content = content
+    return content is not None and _check_dest(args.dest)
 
-def _check_url(url):
+def _read_url(url):
+    """
+    Reads content from url depending on location (local/remote)
+    """
     if urlparse(url).scheme == "":
-        print("filepath")
-        with open(url, 'r', encoding='UTF-8') as f:
-            print(f.read())
+        try:
+            with open(url, 'r', encoding='UTF-8') as f:
+                return f.read()
+        except FileNotFoundError as e:
+            print(e)
+            return None
     else:
-        print("url")
         request = Request(url, headers={"Content-Type":"text/plain;charset=utf-8"})
-        with urlopen(request) as f:
-            print(f.read().decode(encoding='UTF-8'))
-    return False
+        try:
+            with urlopen(request) as f:
+                return f.read().decode(encoding='UTF-8')
+        except HTTPError as e:
+            print(e)
+            return None
 
-def _check_dest(url):
+def _check_dest(path):
+    """
+    Checks if the destination directory exists. Returns True if it exists, False otherwise.
+    """
+    try:
+        if isdir(path):
+            return True
+        else:
+            print('"{}" is not a directory or doesn\'t exist!'.format(path))
+    except Exception as e:
+        print(e)
     return False
 
 def get_args():
@@ -43,6 +65,7 @@ def get_args():
     parser = _get_parser()
     args = parser.parse_args()
     if _check_args(args):
+        args
         return args
     else:
         print("Something went wrong :(")
