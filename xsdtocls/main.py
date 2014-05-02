@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
-from tools import cli, read_url
-import generator
+from tools import cli
+from generator import parser
 
 def main():
     args = cli.get_args()
-    content = read_url.read(args.url)
+    tree = parser.parse(args.url)
+    if tree:
+        print(parser.tostr(tree))
 
 if __name__ == '__main__':
     main()
