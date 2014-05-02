@@ -24,21 +24,18 @@ def _check_dest(path):
     """
     Checks if the destination directory exists. Returns True if it exists, False otherwise.
     """
-    try:
-        if isdir(path):
-            return True
-        else:
-            print('"{}" is not a directory or doesn\'t exist!'.format(path))
-    except Exception as e:
-        print(e)
+    if isdir(path):
+        return True
+    else:
+        print('"{}" is not a directory or doesn\'t exist!'.format(path))
     return False
 
-def get_args():
+def get_args(argv = None):
     """
     Returns the parsed arguments from the CLI.
     """
     parser = _get_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if _check_args(args):
         return args
     else:
