@@ -1,8 +1,8 @@
 import pytest
 
-from tools import cli, read_url
+from xsdtocls.tools import cli, read_url
 
-local_file = '../resources/facebook.xsd'
+local_file = 'resources/facebook.xsd'
 remote_file = 'http://api.facebook.com/1.0/facebook.xsd‎'
 
 class TestCLI:
