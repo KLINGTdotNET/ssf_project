@@ -14,4 +14,4 @@ def tostr(tree):
     """
     Returns the string representation of the etree
     """
-    return etree.tostring(tree)
+    return etree.tostring(tree, pretty_print=True)

@@ -7,7 +7,7 @@ def main():
     args = cli.get_args()
     tree = parser.parse(args.url)
     if tree:
-        print(parser.tostr(tree))
+        root = tree.getroot()
 
 if __name__ == '__main__':
     main()
