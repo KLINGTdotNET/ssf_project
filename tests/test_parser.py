@@ -1,7 +1,7 @@
 import pytest
 
 from tests.globals import local_filepath, remote_filepath
-from xsdtocls.generator import parser
+from xsdtocls.processor import parser
 
 class TestParser:
     """
@@ -21,3 +21,11 @@ class TestParser:
 
     def test_bad_remote(self):
         assert parser.parse(self.bad_remote_filepath) is None
+
+class TestExtractor:
+    """
+    Test the xml extractor
+    """
+
+    def test(self):
+        pass

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 from tools import cli
-from generator import parser
+from processor import parser, extractor
 
 def main():
     args = cli.get_args()
     tree = parser.parse(args.url)
     if tree:
-        root = tree.getroot()
+        extractor.extract(tree)
 
 if __name__ == '__main__':
     main()
