@@ -20,14 +20,12 @@ def map(tree):
     qualified = True if schema.attrib['elementFormDefault'] == 'qualified' else False
     print('qualified: {}\ntarget-namespace: {}\nnamespaces: {}'.format(qualified, tns, schema.nsmap))
     doc = {}
-    doc['attributes'] = [_ for _ in schema.iterchildren(tag='{%s}attribute' % xsdns)]
-    doc['elements'] = [_ for _ in schema.iterchildren(tag='{%s}element' % xsdns)]
-    doc['complex_types'] = [_ for _ in schema.iterchildren(tag='{%s}complexType' % xsdns)]
-    doc['simple_types'] = [_ for _ in schema.iterchildren(tag='{%s}simpleType' % xsdns)]
-    #
+    doc['attributes'] = [_ for _ in schema.iterchildren(tag='{%s}attribute' % xsdns['ns'])]
+    doc['elements'] = [_ for _ in schema.iterchildren(tag='{%s}element' % xsdns['ns'])]
+    doc['complex_types'] = [_ for _ in schema.iterchildren(tag='{%s}complexType' % xsdns['ns'])]
+    doc['simple_types'] = [_ for _ in schema.iterchildren(tag='{%s}simpleType' % xsdns['ns'])]
     for k, v in doc.items():
         logging.debug('{1} {0}'.format(k, len(v)))
-    #
     simple_types(doc['simple_types'], tns)
 
 def simple_types(simples, tns):
