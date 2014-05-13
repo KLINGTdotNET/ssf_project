@@ -6,7 +6,7 @@ import logging
 
 def main():
     args = cli.get_args()
-    log_format = '[%(levelname)s] %(filename)s->%(funcName)s >>> "%(message)s"'
+    log_format = '[%(levelname)s] (#%(lineno)s) %(filename)s->%(funcName)s>>> "%(message)s"'
     if args.debug:
         logging.basicConfig(format=log_format, level=logging.DEBUG)
     else:

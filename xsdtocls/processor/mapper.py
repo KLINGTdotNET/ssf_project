@@ -2,8 +2,7 @@
 Todo: rename this module
 """
 from lxml import etree
-from model import types
-from collections import deque
+from model import schemaElements
 
 import logging
 
@@ -29,17 +28,60 @@ def map(tree):
     simple_types(doc['simple_types'], tns, xsdns)
 
 def simple_types(simples, tns, xsdns):
+    '''
+    see http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#element-simpleType
+    '''
     for simple in simples:
         if 'name' in simple.attrib.keys():
             name = simple.attrib['name']
             if len(simple):
                 for child in simple:
                     if child.tag == qualify('restriction', xsdns['ns']):
-                        print(child.attrib)
+                        simple_type_restriction(child, xsdns)
+                    elif child.tag == qualify('list', xsdns['ns']):
+                        simple_type_list()
+                    elif child.tag ==qualify('union', xsdns['ns']):
+                        simple_type_union()
+                    else:
+                        logging.debug('Unexpected element "{}" in "{}"'.format(child.tag, name))
             else:
                 logging.debug('SimpleType "{}" is empty'.format(name))
         else:
             logging.debug('Nameless SimpleType in "{}"'.format(tns))
 
+def simple_type_restriction(restriction, xsdns):
+    base = restriction.attrib['base']
+    content = {}
+    if len(restriction):
+        for child in restriction:
+            tag = unqualify(child.tag, xsdns['ns'])
+            #(minExclusive | minInclusive | maxExclusive | maxInclusive | totalDigits | fractionDigits | length | minLength | maxLength | enumeration | whiteSpace | pattern)
+            if tag == 'enumeration':
+                if not 'enumeration' in content:
+                    content['enumeration'] = []
+                content['enumeration'].append(child.attrib['value'])
+            elif 'max' in tag or 'min' in tag:
+                ltag = tag.lower()
+                if 'exclusive' in ltag:
+                    logging.warn('Implement me!')
+                elif 'inclusive' in ltag:
+                    logging.warn('Implement me!')
+                elif 'length' in ltag:
+                    logging.warn('Implement me!')
+                else:
+                    logging.debug('Unsupported tag "{}" in SimpleType restriction'.format(child.tag))
+            else:
+                logging.debug('Unsupported tag "{}" in SimpleType'.format(child.tag))
+    return content
+
+def simple_type_list():
+    pass
+
+def simple_type_union():
+    pass
+
 def qualify(name, ns):
     return '{{{}}}{}'.format(ns, name)
+
+def unqualify(name, ns):
+    return name.replace('{{{}}}'.format(ns), '')
