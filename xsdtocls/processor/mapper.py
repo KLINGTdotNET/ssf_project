@@ -7,55 +7,88 @@ from model import schemaElements
 import logging
 
 def map(tree):
-    schema = tree.getroot()
+    root = tree.getroot()
     xsdns = None
-    for prefix, ns in schema.nsmap.items():
+    for prefix, ns in root.nsmap.items():
         if ns == 'http://www.w3.org/2001/XMLSchema':
             xsdns = {'prefix': prefix, 'ns': ns}
     if not xsdns:
         logging.error('XSD namespace is not defined!')
         raise SystemExit('Terminating ...')
-    tns = schema.attrib['targetNamespace']
-    qualified = True if schema.attrib['elementFormDefault'] == 'qualified' else False
-    print('qualified: {}\ntarget-namespace: {}\nnamespaces: {}'.format(qualified, tns, schema.nsmap))
-    doc = {}
-    doc['attributes'] = [_ for _ in schema.iterchildren(tag=qualify('attribute', xsdns['ns']))]
-    doc['elements'] = [_ for _ in schema.iterchildren(tag=qualify('element', xsdns['ns']))]
-    doc['complex_types'] = [_ for _ in schema.iterchildren(tag=qualify('complexType', xsdns['ns']))]
-    doc['simple_types'] = [_ for _ in schema.iterchildren(tag=qualify('simpleType', xsdns['ns']))]
-    for k, v in doc.items():
+    tns = root.attrib['targetNamespace']
+    qualified = True if root.attrib['elementFormDefault'] == 'qualified' else False
+    print('qualified: {}\ntarget-namespace: {}\nnamespaces: {}'.format(qualified, tns, root.nsmap))
+    schema = {}
+    # note that if the schema element is the parent node, then the actual note contains a declaration
+    schema['attributes'] = [_ for _ in root.iterchildren(tag=qualify('attribute', xsdns['ns']))]
+    schema['elements'] = [_ for _ in root.iterchildren(tag=qualify('element', xsdns['ns']))]
+    schema['complex_types'] = [_ for _ in root.iterchildren(tag=qualify('complexType', xsdns['ns']))]
+    schema['simple_types'] = [_ for _ in root.iterchildren(tag=qualify('simpleType', xsdns['ns']))]
+    for k, v in schema.items():
         logging.debug('{1} {0}'.format(k, len(v)))
-    simple_types(doc['simple_types'], tns, xsdns)
+    simple_types(schema['simple_types'], tns, xsdns)
+    attributes(schema['attributes'], tns, xsdns)
+
+def attributes(attributes, tns, xsdns):
+    '''
+    see http://www.w3.org/TR/xmlschema-1/#cAttribute_Declarations
+    '''
+    for attribute in attributes:
+        if 'name' in attribute.attrib:
+            name = attribute.attrib['name']
+            if 'fixed' in attribute.attrib:
+                fixed = attribute.attrib['fixed']
+            if 'default' in attribute.attrib:
+                default = attribute.attrib['default']
+            if 'use' in attribute.attrib:
+                # optional, required or prohibited
+                use = attribute.attrib['use']
+            if len(attribute):
+                # type definition in child nodes (must be a SimpleType)
+                pass
+            else:
+                type = attribute.attrib['type']
+        elif 'ref' in attribute.attrib:
+            console.debug('Implement me!')
+        else:
+            console.debug('Wether "reference" nor a "explicit declaration"!')
+
 
 def simple_types(simples, tns, xsdns):
     '''
     see http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#element-simpleType
     '''
+    simple_types = []
     for simple in simples:
         if 'name' in simple.attrib.keys():
             name = simple.attrib['name']
+            content = {}
             if len(simple):
                 for child in simple:
                     if child.tag == qualify('restriction', xsdns['ns']):
-                        simple_type_restriction(child, xsdns)
+                        content = simple_type_restriction(child, xsdns)
                     elif child.tag == qualify('list', xsdns['ns']):
-                        simple_type_list()
+                        content = simple_type_list()
                     elif child.tag ==qualify('union', xsdns['ns']):
-                        simple_type_union()
+                        content = simple_type_union()
                     else:
                         logging.debug('Unexpected element "{}" in "{}"'.format(child.tag, name))
             else:
                 logging.debug('SimpleType "{}" is empty'.format(name))
         else:
             logging.debug('Nameless SimpleType in "{}"'.format(tns))
+        # create object of class SimpleType
+        simple_types.append((name, content))
+    return simple_types
 
 def simple_type_restriction(restriction, xsdns):
-    base = restriction.attrib['base']
-    content = {}
+    '''
+    see http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#element-restriction
+    '''
+    content = {'base': restriction.attrib['base']}
     if len(restriction):
         for child in restriction:
             tag = unqualify(child.tag, xsdns['ns'])
-            #(minExclusive | minInclusive | maxExclusive | maxInclusive | totalDigits | fractionDigits | length | minLength | maxLength | enumeration | whiteSpace | pattern)
             if tag == 'enumeration':
                 if not 'enumeration' in content:
                     content['enumeration'] = []
@@ -75,10 +108,10 @@ def simple_type_restriction(restriction, xsdns):
     return content
 
 def simple_type_list():
-    pass
+    logging.warn('Implement me!')
 
 def simple_type_union():
-    pass
+    logging.warn('Implement me!')
 
 def qualify(name, ns):
     return '{{{}}}{}'.format(ns, name)
