@@ -26,8 +26,10 @@ def map(tree):
     schema['simple_types'] = [_ for _ in root.iterchildren(tag=qualify('simpleType', xsdns['ns']))]
     for k, v in schema.items():
         logging.debug('{1} {0}'.format(k, len(v)))
-    simple_types(schema['simple_types'], tns, xsdns)
     attributes(schema['attributes'], tns, xsdns)
+    simple_types(schema['simple_types'], tns, xsdns)
+    complex_types(schema['complex_types'], tns, xsdns)
+    elements(schema['elements'], tns, xsdns)
 
 def attributes(attributes, tns, xsdns):
     '''
@@ -112,6 +114,26 @@ def simple_type_list():
 
 def simple_type_union():
     logging.warn('Implement me!')
+
+def complex_types(complexs, tns, xsdns):
+    '''
+    see http://www.w3.org/TR/xmlschema-1/#Complex_Type_Definitions
+    '''
+    for complex in complexs:
+        if 'name' in complex.attrib:
+            name = complex.attrib['name']
+            if 'abstract' in complex.attrib:
+                abstract = True if complex.attrib['abstract'].lower() == "true" else False
+            if 'mixed' in complex.attrib:
+                mixed = True if complex.attrib['mixed'].lower() == "true" else False
+            if 'final' in complex.attrib:
+                final = complex.attrib['final'].split()
+        else:
+            pass
+            # anonymous (local) type definition
+
+def elements(elements, tns, xsdns):
+    pass
 
 def qualify(name, ns):
     return '{{{}}}{}'.format(ns, name)
