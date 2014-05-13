@@ -7,7 +7,11 @@ def parse(url):
     Returns an etree object generated from the schema under the url
     """
     try:
-        return etree.parse(url)
+        try:
+            return etree.parse(url)
+        except etree.XMLSyntaxError as e:
+            print(e)
+            return None
     except OSError as e:
         print(e)
         return None

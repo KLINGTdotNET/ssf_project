@@ -9,9 +9,12 @@ def _get_parser():
         help='The url can point to a local file or to a web resource.')
     parser.add_argument('dest',
         help='Path to the destination where the generated files will be saved.')
-    parser.add_argument('-l, --lang',
+    parser.add_argument('-l','--lang',
         default='Java',
         help='Name of the destination language. (Note: This feature is currently not implemented!)')
+    parser.add_argument('-d','--debug',
+        help='Output debugging information',
+        action='store_true')
     return parser
 
 def _check_args(args):
