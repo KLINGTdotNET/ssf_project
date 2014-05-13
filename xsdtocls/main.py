@@ -6,8 +6,11 @@ import logging
 
 def main():
     args = cli.get_args()
+    log_format = '[%(levelname)s] %(filename)s->%(funcName)s >>> "%(message)s"'
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(format=log_format, level=logging.DEBUG)
+    else:
+        logging.basicConfig(format=log_format)
     tree = parser.parse(args.url)
     if tree:
         mapper.map(tree)
