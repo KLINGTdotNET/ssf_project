@@ -1,4 +1,5 @@
 from lxml import etree
+from os.path import isfile
 # lxml.etree is in most parts compatible with the ElementTree of the STL, http://lxml.de/compatibility.html
 # lxml supports XPath, XSLT, Relax NG, and XML Schema, which ElementTree does not.
 
