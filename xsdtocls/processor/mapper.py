@@ -206,7 +206,7 @@ def map_complex_type(complex):
     return content
 
 def map_complex_content(complex):
-    content = { 'content': [] } # can be empty, avoid
+    content = {}
     if complex[0].tag == qualify('extension', complex[0]):
         content['extends'] = {
             'base': map_type(complex[0].attrib['base'], complex[0].nsmap)
@@ -221,6 +221,8 @@ def map_complex_content(complex):
         if child.tag == qualify('sequence', child):
             content['ordering'] = map_sequence(child)
         elif child.tag == qualify('attribute', child):
+            if not 'content' in content:
+                content['content'] = []
             content['content'].append(map_attribute(child))
     return content
 
