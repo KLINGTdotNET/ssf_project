@@ -23,6 +23,9 @@ def map(tree):
     schema['simple_types'] = [_ for _ in root.iterchildren(tag=qualify('simpleType', root))]
 
     model = {
+        'tns': tns,
+        'qualified': qualified,
+        'nsmap': root.nsmap,
         'attributes': [],
         'types': [],
         'elements': []
@@ -40,7 +43,6 @@ def map(tree):
         model['types'].append(map_complex_type(complex_type))
     for element in schema['elements']:
         model['elements'].append(map_element(element))
-    pp.pprint(model)
     return model
 
 def map_import(schema_import):

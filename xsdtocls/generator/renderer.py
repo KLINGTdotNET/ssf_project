@@ -1,4 +1,7 @@
 import logging
 
+from generator import javaRenderer
+
 def render(model, path, lang):
-    logging.debug(path + ' ' + lang.lower())
+    if lang.lower() == 'java':
+        javaRenderer.render(model, path)
