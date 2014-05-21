@@ -2,6 +2,7 @@
 
 from tools import cli
 from processor import parser, mapper
+from generator import renderer
 import logging
 
 def main():
@@ -13,7 +14,8 @@ def main():
         logging.basicConfig(format=log_format)
     tree = parser.parse(args.url)
     if tree:
-        mapper.map(tree)
+        model = mapper.map(tree)
+        renderer.render(model, args.dest, args.lang)
 
 if __name__ == '__main__':
     main()
