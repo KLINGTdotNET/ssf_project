@@ -4,9 +4,6 @@ Todo: rename this module
 from lxml import etree
 from model import schemaElements
 
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
-
 import logging
 
 def map(tree):
@@ -193,46 +190,23 @@ def map_complex_type(complex):
             elif 'complexContent' == unqualified:
                 if 'content' not in content:
                     content['content'] = []
+                # replace this with extension/restriction
                 content['content'].append(map_complex_content(child))
             elif 'sequence' == unqualified:
-                # elements must appear in that order
-                if 'ordering' not in content:
-                    content['ordering'] = {} # change this
-                for subchild in child:
-                    if subchild.tag == qualify('element', subchild):
-                        if 'sequence' not in content['ordering']:
-                            content['ordering']['sequence'] = []
-                        content['ordering']['sequence'].append(map_element(subchild))
-                    elif subchild.tag == qualify('choice', subchild):
-                        # http://msdn.microsoft.com/de-de/library/ms256109(v=vs.110).aspx
-                        # only of of the contained elements should be present!
-                        for choiceElement in subchild:
-                            if 'choice' not in content['ordering']:
-                                content['ordering']['choice'] = {}
-                                content['ordering']['choice']['elements'] = []
-                            content['ordering']['choice']['elements'].append(map_element(choiceElement))
-                    elif subchild.tag == qualify('any', subchild):
-                        # http://msdn.microsoft.com/de-de/library/ms256043(v=vs.110).aspx
-                        # elements can be part of arbitrary namespaces
-                        for s in subchild:
-                            print(s.tag, s.attrib)
-                    else:
-                        logging.debug('Unimplemented tag "{}"'.format(subchild.tag))
+                content['ordering'] = map_sequence(child)
             elif 'simpleContent' == unqualified:
                 if 'content' not in content:
                     content['content'] = []
                 content['content'].append(map_simple_content(child))
             elif 'all' == unqualified:
                 # elements can occur in any order
-                for subchild in child:
-                    # todo
-                    pass
+                content['all'] = map_sequence(child)
             else:
                 logging.debug('Unexpected element "{}"'.format(unqualified))
     return content
 
 def map_complex_content(complex):
-    content = { 'content': [] }
+    content = { 'content': [] } # can be empty, avoid
     if complex[0].tag == qualify('extension', complex[0]):
         content['extends'] = {
             'base': map_type(complex[0].attrib['base'], complex[0].nsmap)
@@ -245,10 +219,46 @@ def map_complex_content(complex):
         logging.debug('Bad complexContent definition with direct child {}'.format(simple[0].tag))
     for child in complex[0]:
         if child.tag == qualify('sequence', child):
-            pass # todo
+            content['ordering'] = map_sequence(child)
         elif child.tag == qualify('attribute', child):
             content['content'].append(map_attribute(child))
     return content
+
+def map_sequence(element):
+    ordering = {}
+    # elements must appear in that order
+    for child in element:
+        if child.tag == qualify('element', child):
+            if 'sequence' not in ordering:
+                ordering['sequence'] = []
+            ordering['sequence'].append(map_element(child))
+        elif child.tag == qualify('choice', child):
+            # http://msdn.microsoft.com/de-de/library/ms256109(v=vs.110).aspx
+            # only of of the contained elements should be present!
+            for choiceElement in child:
+                if 'choice' not in ordering:
+                    ordering['choice'] = []
+                ordering['choice'].append(map_element(choiceElement))
+        elif child.tag == qualify('any', child):
+            # http://msdn.microsoft.com/de-de/library/ms256043(v=vs.110).aspx
+            # elements can be part of arbitrary namespaces
+            ordering['any'] = {}
+            for attribute in child.attrib:
+                if 'occurs' in attribute.lower():
+                    ordering['occurance'] = {
+                        'min': 1,
+                        'max': 1
+                    }
+                    if attribute == 'minOccurs':
+                        ordering['occurance']['min'] = child.attrib[attribute]
+                    elif attribute == 'maxOccurs':
+                        ordering['occurance']['max'] = child.attrib[attribute]
+                elif attribute == 'namespace':
+                    # http://msdn.microsoft.com/de-de/library/ms256043(v=vs.110).aspx
+                    ordering['any']['namespace'] = child.attrib[attribute]
+        else:
+            logging.debug('Unimplemented tag "{}"'.format(subchild.tag))
+    return ordering
 
 def map_simple_content(simple):
     '''
