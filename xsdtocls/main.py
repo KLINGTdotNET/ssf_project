@@ -5,9 +5,6 @@ from processor import parser, mapper
 from generator import renderer
 import logging
 
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
-
 def main():
     args = cli.get_args()
     log_format = '[%(levelname)s] (#%(lineno)s) %(filename)s->%(funcName)s>>> "%(message)s"'
@@ -18,7 +15,6 @@ def main():
     tree = parser.parse(args.url)
     if tree:
         model = mapper.map(tree)
-        pp.pprint(model['types'])
         renderer.render(model, args.dest, args.lang)
 
 if __name__ == '__main__':

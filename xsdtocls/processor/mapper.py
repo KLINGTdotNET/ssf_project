@@ -4,6 +4,9 @@ Todo: rename this module
 from lxml import etree
 from model import schemaElements
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
 import logging
 
 def map(tree):
@@ -40,7 +43,30 @@ def map(tree):
         model['types'].append(map_complex_type(complex_type))
     for element in schema['elements']:
         model['elements'].append(map_element(element))
+
+    for type in model['types']:
+        pp.pprint(type)
+        to_type_class(type, tns)
     return model
+
+def to_type_class(type, tns):
+    name = type['name']
+    base = None
+    ns = tns
+    fields = {}
+    if 'content' in type:
+        content = type['content']
+        if 'base' in content:
+            base = content['base']
+            if len(content) == 1:
+                fields['value'] = base['name']
+            else:
+                if 'enumeration' in content:
+                    fields['enum'] = content['enumeration']
+                # todo simple type lists?
+    if 'ordering' in type:
+        ordering = type['ordering']
+    pp.pprint([name, ns, base, fields])
 
 def map_import(schema_import):
     '''
@@ -119,7 +145,7 @@ def map_simple_type(simple):
             if child.tag == qualify('restriction', child):
                 content['content'] = simple_type_restriction(child)
             elif child.tag == qualify('list', child):
-                content['content'] = simple_type_list()
+                content['content'] = simple_type_list(child)
             elif child.tag == qualify('union', child):
                 content['content'] = simple_type_union()
             else:
@@ -131,8 +157,11 @@ def map_simple_type(simple):
 def simple_type_restriction(restriction):
     '''
     see http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#element-restriction
+    or http://msdn.microsoft.com/en-us/library/ms256219(v=vs.110).aspx
     '''
-    content = {'base': map_type(restriction.attrib['base'], restriction.nsmap)}
+    content = {
+        'base': map_type(restriction.attrib['base'], restriction.nsmap)
+    }
     if len(restriction):
         for child in restriction:
             tag = unqualify(child.tag, child)
@@ -140,22 +169,38 @@ def simple_type_restriction(restriction):
                 if not 'enumeration' in content:
                     content['enumeration'] = []
                 content['enumeration'].append(child.attrib['value'])
-            elif 'max' in tag or 'min' in tag:
-                ltag = tag.lower()
-                if 'exclusive' in ltag:
-                    logging.warn('Implement me!')
-                elif 'inclusive' in ltag:
-                    logging.warn('Implement me!')
-                elif 'length' in ltag:
-                    logging.warn('Implement me!')
-                else:
-                    logging.debug('Unsupported tag "{}" in SimpleType restriction'.format(child.tag))
+                content['restrictions'] = {}
+                for attribute in child.attrib:
+                    lower = attribute.lower()
+                    if 'max' in lower or 'min' in lower:
+                        if 'exclusive' in lower:
+                            if lower == 'maxExclusive':
+                                content['restrictions']['exclusive'] = { 'max': child.attrib['maxExclusive'] }
+                            else:
+                                content['restrictions']['exclusive'] = { 'min': child.attrib['minExclusive']}
+                        elif 'inclusive' in lower:
+                            if lower == 'maxInclusive':
+                                content['restrictions']['inclusive'] = { 'max': child.attrib['maxInclusive'] }
+                            else:
+                                content['restrictions']['inclusive'] = { 'min': child.attrib['minInclusive']}
+                        elif 'length' in lower:
+                            if lower == 'maxLength':
+                                content['restrictions']['length'] = { 'max': child.attrib['maxLength'] }
+                            else:
+                                content['restrictions']['length'] = { 'min': child.attrib['minLength']}
+                        else:
+                            logging.debug('Unsupported attribute "{}" in SimpleType restriction'.format(attribute))
             else:
                 logging.debug('Unsupported tag "{}" in SimpleType'.format(child.tag))
     return content
 
-def simple_type_list():
-    logging.warn('Implement me!')
+def simple_type_list(node):
+    content = {}
+    if 'itemType' in node.attrib:
+        content['type'] = node.attrib['itemType']
+    else:
+        logging.debug('List without itemType attribute!')
+    return content
 
 def simple_type_union():
     logging.warn('Implement me!')
