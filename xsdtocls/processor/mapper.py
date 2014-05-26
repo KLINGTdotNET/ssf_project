@@ -14,15 +14,8 @@ def map(tree):
     qualified = True if root.attrib['elementFormDefault'] == 'qualified' else False
     tns = root.attrib['targetNamespace'] if 'targetNamespace' in root.attrib else ''
     print('qualified: {}\ntarget-namespace: {}\nnamespaces: {}'.format(qualified, tns, root.nsmap))
-    schema = {}
-    # note that if the schema element is the parent node, then the actual note contains a declaration
-    schema['imports'] = [_ for _ in root.iterchildren(tag=qualify('import', root))]
-    schema['attributes'] = [_ for _ in root.iterchildren(tag=qualify('attribute', root))]
-    schema['elements'] = [_ for _ in root.iterchildren(tag=qualify('element', root))]
-    schema['complex_types'] = [_ for _ in root.iterchildren(tag=qualify('complexType', root))]
-    schema['simple_types'] = [_ for _ in root.iterchildren(tag=qualify('simpleType', root))]
 
-    model = {
+    schema = {
         'tns': tns,
         'qualified': qualified,
         'nsmap': root.nsmap,
@@ -31,42 +24,96 @@ def map(tree):
         'elements': []
     }
 
-    for k, v in schema.items():
-        logging.debug('{1} {0}'.format(k, len(v)))
-    for schema_import in schema['imports']:
+    for schema_import in [_ for _ in root.iterchildren(tag=qualify('import', root))]:
         pass    # todo
-    for attribute in schema['attributes']:
-        model['attributes'].append(map_attribute(attribute))
-    for simple_type in schema['simple_types']:
-        model['types'].append(map_simple_type(simple_type))
-    for complex_type in schema['complex_types']:
-        model['types'].append(map_complex_type(complex_type))
-    for element in schema['elements']:
-        model['elements'].append(map_element(element))
+    for attribute in [_ for _ in root.iterchildren(tag=qualify('attribute', root))]:
+        schema['attributes'].append(map_attribute(attribute))
+    for simple_type in [_ for _ in root.iterchildren(tag=qualify('simpleType', root))]:
+        schema['types'].append(map_simple_type(simple_type))
+    for complex_type in [_ for _ in root.iterchildren(tag=qualify('complexType', root))]:
+        schema['types'].append(map_complex_type(complex_type))
+    for element in [_ for _ in root.iterchildren(tag=qualify('element', root))]:
+        schema['elements'].append(map_element(element))
 
-    for type in model['types']:
-        pp.pprint(type)
-        to_type_class(type, tns)
+    model = {
+        'tns': tns,
+        'attributes': {},
+        'elements': {},
+        'types': {}
+    }
+
+    for type in schema['types']:
+        t = to_type_class(type, tns)
+        model['types'][t.name] = t
+    pp.pprint(model)
     return model
 
-def to_type_class(type, tns):
-    name = type['name']
+def to_type_class(schemaType, tns):
+    name = schemaType['name']
     base = None
     ns = tns
     fields = {}
-    if 'content' in type:
-        content = type['content']
-        if 'base' in content:
-            base = content['base']
-            if len(content) == 1:
-                fields['value'] = base['name']
+    ordering = []
+    if 'attributes' in schemaType:
+        for attribute in schemaType['attributes']:
+            if 'ref' in attribute:
+                # resolve reference on element
+                pass
             else:
-                if 'enumeration' in content:
-                    fields['enum'] = content['enumeration']
-                # todo simple type lists?
-    if 'ordering' in type:
-        ordering = type['ordering']
-    pp.pprint([name, ns, base, fields])
+                fields[attribute['name']] = {
+                    'type': attribute['type'],
+                    'isAttribute': True
+                }
+    if 'content' in schemaType:
+        content = schemaType['content']
+        for key in content:
+            if key == 'enumeration':
+                fields['enum'] = content[key]
+            elif key == 'restrictions':
+                if len(content['restrictions']):
+                    fields['restrictions'] = content[key]
+            elif key == 'base':
+                base = content['base']
+                if len(content) == 1:
+                    # base declares only the type inside of the element
+                    fields['value'] = base['name']
+            elif key == 'extends':
+                base = content['extends']
+            elif key == 'attributes':
+                for attribute in content['attributes']:
+                    fields[attribute['name']] = {
+                        'type': attribute['type'],
+                        'isAttribute': True
+                    }
+            elif key == 'ordering':
+                for order in content[key]:
+                    if order == 'sequence':
+                        sequence = content[key]['sequence']
+                        for element in sequence:
+                            if 'name' in element:
+                                ordering.append(element['name'])
+                                fields[element['name']] = {
+                                    'type': element['type'],
+                                    'occurance': element['occurance']
+                                }
+                            elif 'ref' in element:
+                                # resolve reference on element
+                                pass
+                            else:
+                                logging.debug('Unexpected element: "{}"'.format(element))
+                    else:
+                        logging.debug(order)
+            else:
+                logging.debug('Unexpected element "{}"'.format(key))
+    if 'ordering' in schemaType:
+        ordering = schemaType['ordering']
+    type = schemaElements.Type()
+    type.name = name
+    type.base_class = base
+    type.ns = tns
+    type.fields = fields
+    type.ordering = ordering
+    return type
 
 def map_import(schema_import):
     '''
@@ -145,9 +192,9 @@ def map_simple_type(simple):
             if child.tag == qualify('restriction', child):
                 content['content'] = simple_type_restriction(child)
             elif child.tag == qualify('list', child):
-                content['content'] = simple_type_list(child)
+                content['list'] = simple_type_list(child)
             elif child.tag == qualify('union', child):
-                content['content'] = simple_type_union()
+                content['union'] = simple_type_union()
             else:
                 logging.debug('Unexpected element "{}" in "{}"'.format(child.tag, name))
     else:
@@ -233,16 +280,11 @@ def map_complex_type(complex):
                     content['attributes'] = []
                 content['attributes'].append(map_attribute(child))
             elif 'complexContent' == unqualified:
-                if 'content' not in content:
-                    content['content'] = []
-                # replace this with extension/restriction
-                content['content'].append(map_complex_content(child))
+                content['content'] = map_complex_content(child)
             elif 'sequence' == unqualified:
                 content['ordering'] = map_sequence(child)
             elif 'simpleContent' == unqualified:
-                if 'content' not in content:
-                    content['content'] = []
-                content['content'].append(map_simple_content(child))
+                content['content'] = map_simple_content(child)
             elif 'all' == unqualified:
                 # elements can occur in any order
                 content['all'] = map_sequence(child)
@@ -266,9 +308,9 @@ def map_complex_content(complex):
         if child.tag == qualify('sequence', child):
             content['ordering'] = map_sequence(child)
         elif child.tag == qualify('attribute', child):
-            if not 'content' in content:
-                content['content'] = []
-            content['content'].append(map_attribute(child))
+            if not 'attributes' in content:
+                content['attributes'] = []
+            content['attributes'].append(map_attribute(child))
     return content
 
 def map_sequence(element):
@@ -337,17 +379,18 @@ def map_simple_content(simple):
     return content
 
 def map_element(element):
-    content = {}
+    content = {
+        'occurance': {
+            'min': 1,
+            'max': 1
+        }
+    }
     for key in element.attrib:
         if key == 'name':
             content['name'] = element.attrib[key]
         elif key == 'type':
             content['type'] = map_type(element.attrib[key], element.nsmap)
         elif 'occurs' in key.lower():
-            content['occurance'] = {
-                'min': 1,
-                'max': 1
-            }
             if key == 'minOccurs':
                 content['occurance']['min'] = element.attrib[key]
             elif key == 'maxOccurs':

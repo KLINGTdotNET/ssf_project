@@ -16,12 +16,13 @@ class Type():
         self._name = ''
         self._ns = ''
         self._base_class = None
-        self._modifiers = []
+        self._modifiers = [ 'public' ]
         self._fields = {} # elements?
+        self._ordering = []
 
     @property
     def name(self):
-        return _name
+        return self._name
 
     @name.setter
     def name(self, value):
@@ -30,6 +31,7 @@ class Type():
     @property
     def ns(self):
         return self._ns
+
     @ns.setter
     def ns(self, value):
         self._ns = value
@@ -57,3 +59,11 @@ class Type():
     @fields.setter
     def fields(self, value):
         self._fields = value
+
+    @property
+    def ordering(self):
+        return self._ordering
+
+    @ordering.setter
+    def ordering(self, value):
+        self._ordering = value
