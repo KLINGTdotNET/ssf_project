@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from tools import cli
-from processor import parser, mapper
+from processor import parser, schemamapper, classmapper
 from generator import renderer
 import logging
 
@@ -14,8 +14,11 @@ def main():
         logging.basicConfig(format=log_format)
     tree = parser.parse(args.url)
     if tree:
-        model = mapper.map(tree)
-        renderer.render(model, args.dest, args.lang)
+        sm = schemamapper.SchemaMapper(tree)
+        schemamodel = sm.map()
+        cm = classmapper.ClassMapper(schemamodel)
+        classmodel = cm.map()
+        renderer.render(classmodel, args.dest, args.lang)
 
 if __name__ == '__main__':
     main()

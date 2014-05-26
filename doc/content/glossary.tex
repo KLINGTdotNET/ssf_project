@@ -1,5 +1,69 @@
-\newglossaryentry{thing}{
-    name=a thing,
-    description={a lot of something},
-    plural=more things
+\newglossaryentry{REST}{
+    name=\textsc{Rest},
+    description={
+        \emph{Representational State Transfer} (deutsch: \enquote{Gegenständlicher Zustandstransfer}) ist ein Softwarearchitekturstil für Webanwendungen, welcher von Roy Fielding in seiner Dissertation \cite{fieldingDissertation} beschrieben wurde. Die Daten liegen dabei in eindeutig addressierbaren \emph{resources} vor. Die Interaktion basiert auf dem Austausch von \emph{representations} -- also ein Dokument was den aktuellen oder gewünschten Zustand einer resource beschreibt.
+        Beispiel-URL für das Item \emph{84} aus dem Warenkorb \emph{42}:\\
+        \texttt{http://api.spreadshirt.net/api/v1/baskets/84/item/42}
     }
+}
+
+\newglossaryentry{RESTful}{
+    name=\textsc{Rest}ful,
+    description={
+        Als \emph{RESTful} bezeichnet man einen Webservice der den Prinzipien von REST entspricht
+    },
+    see=REST
+}
+
+\newglossaryentry{XML}{
+    name=\textsc{Xml},
+    description={
+        Die \emph{Extensible Markup Language}, kurz \textsc{Xml}, ist eine Auszeichnungssprache (\enquote{Markup Language}), die eine Menge von Regeln beschreibt um Dokumente in einem mensch- und maschinenlesbaren Format zu kodieren \cite{XML10Specification}
+    }
+}
+
+\newglossaryentry{XSD}{
+    name=\textsc{Xsd},
+    description={
+        \emph{XML Schema Description}, auch nur \emph{XML Schema} ist eine Schemabeschreibungssprache und enthält Regeln für den Aufbau und zum Validieren einer XML-Datei. Die Beschreibung ist selbst wieder eine gültige XML-Datei
+    },
+    see=XML
+}
+
+\newglossaryentry{URI}{
+    name=\textsc{Uri},
+    description={
+        Ein \enquote{Uniform Resource Identifier} (\gls{URI}) ist eine kompakte Zeichenkette zur Identifizierung einer abstrakten oder physischen Ressource. \ldots{} Eine Ressource ist alles was identifizierbar ist, beispielsweise elektronische Dokumente, Bilder, Dienste und Sammlungen von Ressourcen. (eigene Übersetzung von \cite{w3cURI}).
+        %\emph{Unified Resource Identifier} ist ein Folge von Zeichen, die einen Name oder eine Web-Ressource identifiziert
+    },
+    plural=\textsc{Uri}s
+}
+
+\newglossaryentry{URL}{
+    name=\textsc{Url},
+    description={
+        %\emph{Unified Resource Locator} sind eine Untermenge der \emph{URIs}. Der Unterschied besteht in der expliziten Angabe des Zugrissmechanismus und des Ortes (\enquote{Location}) durch \emph{URLs}, beispielsweise \texttt{http} oder \texttt{ftp}
+        Der Begriff \enquote{Uniform Resource Locator} (\gls{URL}) bezieht sich auf eine Teilmenge von \glspl{URI}. \glspl{URL} identifizieren Ressourcen über den Zugriffsmechanismus, anstelle des Namens oder anderer Attribute der Ressource.
+        (eigene Übersetzung von \cite{w3cURI}).
+    },
+    plural=\textsc{Url}s,
+    see=URI
+}
+
+\newglossaryentry{URN}{
+    name=\textsc{Urn},
+    description={
+        Eine Teilmenge der \glspl{URI}, die sogenannten \enquote{Uniform Resource Names} (\glspl{URN}), sind global eindeutige und beständige Bezeichner für Ressourcen. Sie müssen verfügbar bleiben auch wenn die bezeichnete Ressource nicht mehr erreichbar oder vorhanden ist. \ldots{} Der Unterschied zu einer \gls{URL} besteht darin, das ihr primärer Zweck in der dauerhaften Auszeichnung einer Ressource mit einem Bezeichner besteht.
+        (eigene Übersetzung von \cite{w3cURI}).
+    },
+    plural=\textsc{Urn}s,
+    see=URI
+}
+
+\newglossaryentry{WADL}{
+    name=\textsc{Wadl},
+    description={
+        \emph{Web Application Description Language} ist eine maschinenlesbare Beschreibung einer HTTP-basierten Webanwendung
+    },
+    see=XML
+}

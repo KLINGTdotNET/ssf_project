@@ -1,7 +1,9 @@
 import logging
+import os
 
 from generator import javaRenderer
 
 def render(model, path, lang):
     if lang.lower() == 'java':
-        javaRenderer.render(model, path)
+        renderer = javaRenderer.Renderer(os.path.join('xsdtocls', 'templates', lang.lower()))
+        renderer.render(model, path)

@@ -6,49 +6,59 @@
 \date{\today}
 
 \begin{document}
-    \begin{titlepage}
-        \begin{center}
-            {\Huge
-                \textbf{\documentTitle{}}\\
-            }
-            \vspace{6pt}
-            {\Large
-            \textit{\documentSubtitle{}}
-            }
-            \vspace{12pt}
-            \hrule
-            \vspace{32pt}
-            {
-            	\Large
-            	\textbf{\documentAuthor{}}
-            }
-            \\
-            \vspace{32pt}
-            \includegraphics[width=5cm]{resources/siegel_schwarz}
-            \\
-            \vspace{6pt}
-            \sffamily{
-            	\Large
-            	\university
-            }
-            \vfill
-            \today
-        \end{center}
-    \end{titlepage}
+    \input{titlepage}
     \clearpage
 
     \tableofcontents
     \clearpage
 
-    \section{Introduction}
+    \section{Einführung}
 
-    Andreas Linz
-    \cite{placeholder}
+    Dieses Dokument beschreibt den für die Vorlesung \enquote{Softwaresystemfamilien} erstellten Codegenerator, welcher aus einer abstrakten Beschreibung von Datenformaten in Form einer \gls{XML} Schemabeschreibung (nachfolgend \gls{XSD}) ein Java Package erzeugt.
+
+    \subsection{Motivation}
+
+    Um Daten mit einem Webservices (z.B. eines \gls{RESTful} Webservice) austauschen zu können, müssen diese serialisiert werden, in der Regel wird dabei XML als Format für die serialisierten Daten unterstützt. Die Struktur der serialisierten Daten, die von dem Dienst empfangen bzw. an diesen gesendet werden können, kann in Form einer XML Schema Description maschinenlesbar definiert werden.
+
+    Für eine effektive Verarbeitung der Daten in einer objektorientierten Programmiersprache (bspw. Java), benötigt man eine Abbildung aus der Beschreibung der XML-Darstellung und der Klassendarstellung in der gewählten Programmiersprache. Die manuelle Erstellung dieses \emph{Mappings} ist einerseits monoton und deshalb fehlerträchtig, sowie andererseits sehr zeitaufwendig, sollte sich die API und die verwendeten Datenstrukturen des Webservice ändern.
+
+    Der Generator übernimmt diese Arbeit und erzeugt aus der Beschreibung des Datenschemas automatisch die Klassendarstellung in der gewünschten Programmiersprache.
+
+    Wirklich spannend wie dieses Konzept erst als Teilaspekt eines Generatorsystems, welches eine komplette Client-Bibliothek für einen RESTful Webservice generiert, falls dieser neben der abstrakten Beschreibung der erwarteten Datenformate auch eine solche Beschreibung der verfügbaren Ressourcen bereitstellt, bspw. als \gls{WADL}-Datei (siehe \cref{sec:erweiterung} S. \pageref{sec:erweiterung}).
+
+    \subsection{Was ist XML Schema Description (XSD)}
+
+    Die \emph{XML Schema Description} o.a. nur \emph{XML Schema} ist eine Schemabeschreibungssprache mit Regeln um den Aufbau einer XML-Datei zu beschreiben. Außerdem können bestehende XML-Daten gegen das Schema validiert werden.
+
+    \begin{lstlisting}[language=XML, caption=Beispiel für einen einfachen Schematyp]
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://api.facebook.com/1.0/"
+    xmlns="http://api.facebook.com/1.0/" elementFormDefault="qualified">
+
+<xsd:simpleType name="FacebookApiErrorCode">
+  <xsd:restriction base="xsd:int" />
+</xsd:simpleType>
+    \end{lstlisting}
+
+    \subsection{Python}
+
+    \section{Generator}
+
+    \subsection{Architektur}
+
+    \subsection{Template-Engine}
+
+    \section{Fazit}
+
+    \subsection{Erweiterungsmöglichkeiten}
+    \label{sec:erweiterung}
 
     \clearpage
     \section{Appendix}
 
     % glossary
+    \input{glossary}
     \printglossary[type=main,title={Glossar},toctitle={Glossar}]
 
     % bibliography
