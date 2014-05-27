@@ -3,10 +3,11 @@ import logging
 from urllib.parse import urlparse
 from mako.template import Template
 from mako.lookup import TemplateLookup
+from mako.exceptions import RichTraceback
 
 class Renderer():
     def __init__(self, template_path):
-        self.lookup = TemplateLookup(directories=[template_path])
+        self.lookup = TemplateLookup(directories=[template_path], output_encoding='utf-8')
 
     def render(self, model, path):
         paths = {}
@@ -24,8 +25,17 @@ class Renderer():
         for key, value in self.create_project_structure(paths['root'], model['tns']).items():
             paths[key] = value
         for element in model['elements']:
-            template = self.lookup.get_template('class.template')
-            logging.debug(template.render(name=self.toCamelCase(element['name'])))
+            try:
+                template = self.lookup.get_template('class.template')
+                logging.debug(template.render(name=self.toCamelCase(element['name'])))
+            except:
+                traceback = RichTraceback()
+                msg = 'Mako traceback:\n'
+                for (filename, lineno, function, line) in traceback.traceback:
+                    msg += 'File "{}" @ line "{}" in "{}"'.format(filename, lineno, function)
+                    msg += '\n'
+                msg += '"{}": "{}"'.format(str(traceback.error.__class__.__name__), traceback.error)
+                logging.warn(msg)
 
     def toCamelCase(self, name):
         camelCased = ''

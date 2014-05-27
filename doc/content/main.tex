@@ -1,6 +1,7 @@
 \documentclass[a4paper]{scrartcl}
 \input{preamble}
 \input{vars}
+\include{glossary}
 
 \author{\documentAuthor}
 \date{\today}
@@ -14,51 +15,116 @@
 
     \section{Einführung}
 
-    Dieses Dokument beschreibt den für die Vorlesung \enquote{Softwaresystemfamilien} erstellten Codegenerator, welcher aus einer abstrakten Beschreibung von Datenformaten in Form einer \gls{XML} Schemabeschreibung (nachfolgend \gls{XSD}) ein Java Package erzeugt.
+    Dieses Dokument beschreibt den im Rahmen der Vorlesung \emph{Softwaresystemfamilien} erstellten Codegenerator, welcher aus einer abstrakten Beschreibung von Datenformaten in Form einer \gls{XML} Schemabeschreibung (nachfolgend \gls{XSD}) ein Java Package erzeugt.
 
     \subsection{Motivation}
 
-    Um Daten mit einem Webservices (z.B. eines \gls{RESTful} Webservice) austauschen zu können, müssen diese serialisiert werden, in der Regel wird dabei XML als Format für die serialisierten Daten unterstützt. Die Struktur der serialisierten Daten, die von dem Dienst empfangen bzw. an diesen gesendet werden können, kann in Form einer XML Schema Description maschinenlesbar definiert werden.
+    Um Daten mit Webservices (z.B. eines \gls{RESTful} Webservice) austauschen zu können, müssen diese serialisiert werden, in der Regel wird dabei XML als Format für die serialisierten Daten unterstützt. Die Struktur der serialisierten Daten, die von dem Dienst empfangen bzw. an diesen gesendet werden können, kann in Form einer XML Schema Description maschinenlesbar definiert werden.
 
     Für eine effektive Verarbeitung der Daten in einer objektorientierten Programmiersprache (bspw. Java), benötigt man eine Abbildung aus der Beschreibung der XML-Darstellung und der Klassendarstellung in der gewählten Programmiersprache. Die manuelle Erstellung dieses \emph{Mappings} ist einerseits monoton und deshalb fehlerträchtig, sowie andererseits sehr zeitaufwendig, sollte sich die API und die verwendeten Datenstrukturen des Webservice ändern.
 
     Der Generator übernimmt diese Arbeit und erzeugt aus der Beschreibung des Datenschemas automatisch die Klassendarstellung in der gewünschten Programmiersprache.
 
-    Wirklich spannend wie dieses Konzept erst als Teilaspekt eines Generatorsystems, welches eine komplette Client-Bibliothek für einen RESTful Webservice generiert, falls dieser neben der abstrakten Beschreibung der erwarteten Datenformate auch eine solche Beschreibung der verfügbaren Ressourcen bereitstellt, bspw. als \gls{WADL}-Datei (siehe \cref{sec:erweiterung} S. \pageref{sec:erweiterung}).
+    Wirklich spannend wie dieses Konzept erst als Teilaspekt eines \emph{Generatorsystems}, welches eine komplette Client-Bibliothek für einen \gls{RESTful} Webservice generiert, falls dieser neben der abstrakten Beschreibung der erwarteten Datenformate auch eine solche Beschreibung der verfügbaren Ressourcen bereitstellt, bspw. als \gls{WADL}-Datei (siehe \cref{sec:erweiterung} S. \pageref{sec:erweiterung}).
 
     \subsection{Was ist XML Schema Description (XSD)}
 
-    Die \emph{XML Schema Description} o.a. nur \emph{XML Schema} ist eine Schemabeschreibungssprache mit Regeln um den Aufbau einer XML-Datei zu beschreiben. Außerdem können bestehende XML-Daten gegen das Schema validiert werden.
+    Die \emph{XML Schema Description} o.a. nur \emph{XML Schema} ist eine Schemabeschreibungssprache welche Regeln enthält um den Aufbau einer XML-Datei zu beschreiben. Außerdem können bestehende XML-Daten gegen ein Schema validiert werden.
 
-    \begin{lstlisting}[language=XML, caption=Beispiel für einen einfachen Schematyp]
-<?xml version="1.0" encoding="UTF-8" ?>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    targetNamespace="http://api.facebook.com/1.0/"
-    xmlns="http://api.facebook.com/1.0/" elementFormDefault="qualified">
+    XSD erlaubt die Typdefinition für XML-Elemente und Elementattribute als einfache (sogenannte \texttt{simpleTypes}) sowie strukture Typen (\texttt{complexTypes}).
 
-<xsd:simpleType name="FacebookApiErrorCode">
-  <xsd:restriction base="xsd:int" />
-</xsd:simpleType>
+    \begin{lstlisting}[language=XML, caption=Minimalbeispiel für ein XML-Element]
+<element attribut="wert">Inhalt</element>
     \end{lstlisting}
 
-    \subsection{Python}
+    \begin{lstlisting}[language=XML, label=lst:simple, caption=Beispiel für einen einfachen Schematyp \cite{facebookXSD}]
+<xsd:element name="auth_createToken_response" type="auth_token" />
+<xsd:simpleType name="auth_token">
+  <xsd:restriction base="xsd:string" />
+</xsd:simpleType>
+
+<!-- Beispiel für eine Instanz des Typs -->
+<auth_createToken_response>foobar</auth_createToken_response>
+    \end{lstlisting}
+
+    \begin{lstlisting}[language=XML, label=lst:complex, caption=Beispiel für einen strukturierten Schematyp \cite{facebookXSD}]
+<xsd:element name="video_getUploadLimits_response" type="video_limits" />
+<xsd:complexType name="video_limits">
+  <xsd:sequence>
+    <xsd:element name="length" type="xsd:int" />
+    <xsd:element name="size" type="xsd:long" />
+  </xsd:sequence>
+</xsd:complexType>
+
+<!-- Beispiel für eine Instanz des Typs -->
+<video_getUploadLimits_response>
+    <length>21</length>
+    <size>42</size>
+</video_getUploadLimits_response>
+    \end{lstlisting}
+
+    Neben \gls{XSD} existieren noch weitere Schemasprachen wie \emph{RelaxNG}, die aber im Rahmen dieser Arbeit nicht behandelt werden.
 
     \section{Generator}
+
+    Der Generator ... erfolgt in mehreren Stufen:
+
+    \begin{enumerate}
+        \item Einlesen der Spezifikation (\gls{XSD})
+        \item Überführen der wesentlichen Informationen der Spezifikation in ein Schemamodell
+        \item Erstellung eines Klassenmodells aus dem Datenmodell des Schemas
+        \item Rendern des Quellcodes durch die Template-Engine mit dem Klassenmodell als Eingabe
+    \end{enumerate}
+
+    \subsection{Datenmodelle}
+
+    Vom Generator werden zwei Datenmodelle zur Erzeugung des Quellcodes verwendet, das Schemamodell (\cref{sec:schemamodel}) und das Klassenmodell (\cref{sec:classmodel}).
+
+    \subsubsection{Schemamodell}
+    \label{sec:schemamodel}
+
+    Das Schemamodell kapselt die in der Spezifikation enthaltenen Informationen, in diesem Fall die Regeln aus der \gls{XSD}-Datei, welche die Struktur der XML-Daten festlegen.
+
+    \subsubsection{Klassenmodell}
+    \label{sec:classmodel}
+
+    Durch das Klassenmodell werden die Informationen aus dem Schemamodell auf die Konstrukte der Zielsprache abgebildet.
 
     \subsection{Architektur}
 
     \subsection{Template-Engine}
+
+    \subsection{Alternative zum templatebasierten Ansatz}
+
+    Alternativ zur Verwendung einer \gls{template-engine} ist die Erstellung eines Modells für die Zielsprache des zu erzeugenden Codes möglich. Dieses \emph{Sprachenmodell} müsste dabei die Konstrukte der Zielsprache enthalten und den zu erzeugenden Code in Form eines \gls{AST} beinhalten.
+    Um aus dem Syntaxbaum Quellcode erzeugen können ist zusätzlich ein \emph{Renderer} zu implementieren. Gegenüber der Verwendung von Templates bietet dieser Ansatz folgende Vorteile:
+
+    \begin{itemize}
+        \item Formatierung des erzeugten Codes über Parameter des \emph{Renderers}, bspw. Einrückungstiefe, Position von Klammern (auf neuer Zeile), \ldots
+        \item Optimierung des zu erzeugenden Codes durch Analyse des \gls{AST}
+    \end{itemize}
+
+    Ein Nachteil ist der erhöhte Implementierungsaufwand.
+
+    \section{Installation und Verwendung}
+
+    Um den Generator nutzen zu können müssen noch die nötigen Abhängigkeiten installiert werden. Diese sind in der Datei \texttt{requirements.txt} im Stammverzeichnis des Projektes festgehalten und können mit Hilfe des Python Pakettools \emph{pip} wie folgt installiert werden: \texttt{pip install -r requirements.txt}.
+
+    Es werden zwei Kommandozeilenparameter vom Codegenerator erwartet, erstens eine \gls{URL} welche den Ort der \gls{XSD}-Datei angibt und zweitens den lokalen Pfad an dem das generierte Java Package angelegt werden sollen. Weiterhin existieren noch optionale Parameter zur Ausgabe von Debuginformationen (\texttt{-d/--debug}) oder\textemdash{}für die spätere Erweiterung gedacht\textemdash{}die Angabe der zu verwendenden Zielsprache mittels \texttt{-l/--lang} (Standard ist Java).
+
+    Die Hilfe kann mittels \texttt{-h/--help} ausgegeben werden, bei falscher Verwendung wird diese sowie ein Nutzungshinweis aber automatisch angezeigt.
 
     \section{Fazit}
 
     \subsection{Erweiterungsmöglichkeiten}
     \label{sec:erweiterung}
 
+    Die Implementierung zusätzlicher Zielsprachen durch die Erstellung weiterer Templates ist möglich. Eine Auswahl der Sprache für das Generat ist durch den Kommandozeilenparameter \texttt{-l/--lang LANGUAGE} bereits jetzt vorgesehen.
+
     \clearpage
     \section{Appendix}
 
     % glossary
-    \input{glossary}
     \printglossary[type=main,title={Glossar},toctitle={Glossar}]
 
     % bibliography

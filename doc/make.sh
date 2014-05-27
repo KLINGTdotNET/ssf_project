@@ -19,8 +19,8 @@ fi
 # build pdf from tex
 pushd $BUILD_DIR
 xelatex $XELATEX_OPTS -no-pdf $TEXFILE
-biber $TEXFILE
 makeglossaries $TEXFILE
+biber $TEXFILE
 xelatex $XELATEX_OPTS $TEXFILE > /dev/null
 popd
 

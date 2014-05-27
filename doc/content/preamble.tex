@@ -18,25 +18,29 @@
 \usepackage{csquotes}
 \usepackage{graphicx}
 
-\usepackage{color}
+\usepackage[xcolor=dvipsnames]{xcolor}
 
 \usepackage{hyperref}
 \hypersetup{
-            citecolor=cyan,
-            linkcolor=cyan,
-            urlcolor=cyan,
-            filecolor=cyan
+            citecolor=magenta,
+            linkcolor=blue
             }
 
-\hypersetup{hidelinks}
+\hypersetup{
+    hidelinks,
+    colorlinks=true
+}
 
 \usepackage{listings}
-\setmonofont{Consolas}
+\setmonofont[Scale=0.9]{Droid Sans Mono}
 \lstset{
         basicstyle=\small\ttfamily,
         numbers=left,
         numbersep=5pt,
-        numberstyle=\tiny\color{blue}
+        numberstyle=\tiny\color{darkgray},
+        commentstyle=\sffamily\itshape\color{darkgray},
+        keywordstyle=\color{blue},
+        stringstyle=\color{purple}
 }
 
 \usepackage[german]{cleveref}
