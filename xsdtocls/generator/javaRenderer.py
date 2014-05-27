@@ -7,7 +7,7 @@ from mako.exceptions import RichTraceback
 
 class Renderer():
     def __init__(self, template_path):
-        self.lookup = TemplateLookup(directories=[template_path], output_encoding='utf-8')
+        self.lookup = TemplateLookup(directories=[template_path])
 
     def render(self, model, path):
         paths = {}
@@ -25,9 +25,11 @@ class Renderer():
         for key, value in self.create_project_structure(paths['root'], model['tns']).items():
             paths[key] = value
         for element in model['elements']:
+            rendered_element = None
+            classname = self.toCamelCase(element['name'])
             try:
                 template = self.lookup.get_template('class.template')
-                logging.debug(template.render(name=self.toCamelCase(element['name'])))
+                rendered_element = template.render(name=classname)
             except:
                 traceback = RichTraceback()
                 msg = 'Mako traceback:\n'
@@ -36,6 +38,13 @@ class Renderer():
                     msg += '\n'
                 msg += '"{}": "{}"'.format(str(traceback.error.__class__.__name__), traceback.error)
                 logging.warn(msg)
+            if rendered_element:
+                self.write_to_file(rendered_element, paths, classname)
+
+    def write_to_file(self, rendered, paths, classname):
+        filepath = os.path.join(paths['root'], paths['sources'], paths['package'], classname+'.java')
+        with open(filepath, 'w') as f:
+            f.write(rendered)
 
     def toCamelCase(self, name):
         camelCased = ''
