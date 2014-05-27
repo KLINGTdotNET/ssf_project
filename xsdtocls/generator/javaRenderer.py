@@ -29,7 +29,7 @@ class Renderer():
             classname = self.toCamelCase(element['name'])
             try:
                 template = self.lookup.get_template('class.template')
-                rendered_element = template.render(name=classname)
+                rendered_element = template.render(name=classname, toXML='"test"')
             except:
                 traceback = RichTraceback()
                 msg = 'Mako traceback:\n'

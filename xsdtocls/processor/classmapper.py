@@ -19,10 +19,31 @@ class ClassMapper():
 
         for type in self.schemamodel['types']:
             t = self.to_type_class(type)
+            toXML = self.generate_toXML_method(t)
             model['types'][t.name] = t
 
         for element in self.schemamodel['elements']:
-            pass
+            '''
+            if element['type']['ns'] == model['tns']:
+                pass
+            else:
+                logging.debug(element)
+            '''
+            if 'anonymous' in element['type']:
+                pp.pprint(element)
+            elif element['type']['ns'] == model['tns']:
+                # replace type with declaration
+                t = None
+                for schemaType in self.schemamodel['types']:
+                    if schemaType['name'] == element['type']['name']:
+                        t = schemaType
+                if not t:
+                    logging.debug('Could not find: "{}"'.format(element['type']))
+                else:
+                    element['type'] = t
+                    pp.pprint(element)
+            else:
+                pp.pprint(element)
 
         model['elements'] = self.schemamodel['elements']
 
@@ -117,6 +138,9 @@ class ClassMapper():
         type.fields = fields
         type.ordering = ordering
 
-        pp.pprint((name, base, fields, ordering))
+        #pp.pprint((name, base, fields, ordering))
 
         return type
+
+    def generate_toXML_method(self, t):
+        pass
