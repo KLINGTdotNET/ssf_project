@@ -35,33 +35,18 @@ class Renderer():
 
         for key in model['types']:
             self.render_type_class(model['types'][key], model['tns'], paths)
-        '''
         for key in model['elements']:
-            self.render_element_class(model['elements'][key], model['tns'])
-        '''
-        '''
-        for element in model['elements']:
-            rendered_element = None
-            classname = self.to_camel_case(element['name'])
-            try:
-                template = self.lookup.get_template('class.template')
-                rendered_element = template.render(name=classname, toXML='"test"')
-            except:
-                traceback = RichTraceback()
-                msg = 'Mako traceback:\n'
-                for (filename, lineno, function, line) in traceback.traceback:
-                    msg += 'File "{}" @ line "{}" in "{}"'.format(filename, lineno, function)
-                    msg += '\n'
-                msg += '"{}": "{}"'.format(str(traceback.error.__class__.__name__), traceback.error)
-                logging.warn(msg)
-            if rendered_element:
-                path = filepath = os.path.join(paths['root'], paths['sources'], paths['package'], classname+'.java')
-                self.write_to_file(rendered_element, path, classname)
-        '''
+            self.render_element_class(model['elements'][key], model['tns'], paths)
+
 
     def render_type_class(self, type_class, tns, paths):
         '''
-        Renders type definition as Java class
+        Renders a type definition as a Java class
+
+        Args:
+            type_class (schemaElements.Type): Type definition
+            tns (str): targetnamespace
+            paths (dict): destination paths
         '''
         classname = self.to_camel_case(type_class.name)
         render_args = {
@@ -74,7 +59,8 @@ class Renderer():
             'to_camel_case': self.to_camel_case,
             'base': type_class.base_class,
             'dependencies': type_class.dependencies,
-            'package': self.get_package_name_from_url(tns)
+            'package': self.get_package_name_from_url(tns),
+            'modifiers': type_class.modifiers
         }
         template = self.lookup.get_template('type_class.template')
         rendered_template = self.render_template(template, render_args)
@@ -82,8 +68,32 @@ class Renderer():
             filepath = os.path.join(paths['root'], paths['sources'], paths['package'], classname+'.java')
             self.write_to_file(rendered_template, filepath, classname)
 
-    def render_element_class(self, element_class, tns):
-        pass
+    def render_element_class(self, element_class, tns, paths):
+        '''
+        Renders an element definition as a Java class
+
+        Args:
+            element_class (schemaElements.Type): Element definition
+            tns (str): targetnamespace
+            paths (dict): destination paths
+        '''
+        classname = self.to_camel_case(element_class.name)
+        render_args = {
+            'name': classname,
+            'dependencies': element_class.dependencies,
+            'package': self.get_package_name_from_url(tns),
+            'tns': tns,
+            'typemap': self.typemap,
+            'to_camel_case': self.to_camel_case,
+            'value': element_class.value,
+            'modifiers': element_class.modifiers,
+            'serialiser': element_class.serialiser
+        }
+        template = self.lookup.get_template('element_class.template')
+        rendered_template = self.render_template(template, render_args)
+        if rendered_template:
+            filepath = os.path.join(paths['root'], paths['sources'], paths['package'], classname+'.java')
+            self.write_to_file(rendered_template, filepath, classname)
 
     def render_template(self, template, args):
         '''

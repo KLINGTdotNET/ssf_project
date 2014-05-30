@@ -7,16 +7,16 @@ import ${package}.${to_camel_case(dependency)};
 class ${name} ${"extends " + base['name'] if base and base['ns'] == tns else ''} {
 
     % for f in fields:
-    private ${typemap[fields[f]]} ${f};
+    ${modifiers['fields']} ${typemap[fields[f]]} ${f};
     % endfor
 
     % if 'sequence' in ordering:
         % for e in ordering['sequence']:
             % if 'anonymous' not in e['type']:
                 % if e['type']['ns'] == tns:
-    private ${to_camel_case(e['type']['name'])} ${e['name']};
+    ${modifiers['fields']} ${to_camel_case(e['type']['name'])} ${e['name']};
                 % else:
-    private ${typemap[e['type']['name']]} ${e['name']};
+    ${modifiers['fields']} ${typemap[e['type']['name']]} ${e['name']};
                 % endif
             % else:
                 ## anonymous type declarations have to be handled here
@@ -25,11 +25,11 @@ class ${name} ${"extends " + base['name'] if base and base['ns'] == tns else ''}
     % endif
 
     % for f in fields:
-    public void set${to_camel_case(f)}(${typemap[fields[f]]} value) {
+    ${modifiers['methods']} void set${to_camel_case(f)}(${typemap[fields[f]]} value) {
         this.${f} = value;
     }
 
-    public ${typemap[fields[f]]} get${to_camel_case(f)}() {
+    ${modifiers['methods']} ${typemap[fields[f]]} get${to_camel_case(f)}() {
         return this.${f};
     }
     % endfor
@@ -37,11 +37,11 @@ class ${name} ${"extends " + base['name'] if base and base['ns'] == tns else ''}
     % if 'sequence' in ordering:
         % for e in ordering['sequence']:
             % if 'anonymous' not in e['type']:
-    public void set${to_camel_case(e['name'])}(${to_camel_case(e['type']['name']) if e['type']['ns'] == tns else typemap[e['type']['name']]} ${e['name']}) {
+    ${modifiers['methods']} void set${to_camel_case(e['name'])}(${to_camel_case(e['type']['name']) if e['type']['ns'] == tns else typemap[e['type']['name']]} ${e['name']}) {
         this.${e['name']} = ${e['name']};
     }
 
-    public ${to_camel_case(e['type']['name']) if e['type']['ns'] == tns else typemap[e['type']['name']]} get${to_camel_case(e['name'])}() {
+    ${modifiers['methods']} ${to_camel_case(e['type']['name']) if e['type']['ns'] == tns else typemap[e['type']['name']]} get${to_camel_case(e['name'])}() {
         return this.${e['name']};
     }
             % else:
@@ -50,7 +50,7 @@ class ${name} ${"extends " + base['name'] if base and base['ns'] == tns else ''}
         % endfor
     % endif
 
-    public String toXML() {
+    ${modifiers['methods']} String toXML() {
         return ${serialiser};
     }
 }

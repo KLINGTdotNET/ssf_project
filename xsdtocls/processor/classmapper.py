@@ -26,29 +26,14 @@ class ClassMapper():
 
         for type_definition in self.schemamodel['types']:
             t = self.to_type_class(type_definition)
-            toXML = self.generate_toXML_method(t)
-            model['types'][t.name] = t
+            if t:
+                model['types'][t.name] = t
 
-        for element in self.schemamodel['elements']:
-            '''
-            refactor to seperate method that replaces the type declaration with its definition
-            '''
-            if 'anonymous' in element['type']:
-                # type definition is already included
-                pass
-            elif element['type']['ns'] == model['tns']:
-                # replace type with definition
-                t = None
-                for schemaType in self.schemamodel['types']:
-                    if schemaType['name'] == element['type']['name']:
-                        t = schemaType
-                if not t:
-                    logging.debug('Could not find: "{}"'.format(element['type']))
-                else:
-                    element['type'] = t
-            else:
-                pass
-        model['elements'] = self.schemamodel['elements']
+        for element_definition in self.schemamodel['elements']:
+            e = self.to_element_class(element_definition)
+            if e:
+                model['elements'][e.name] = e
+
         return model
 
     def resolve_reference(self, ref):
@@ -182,9 +167,41 @@ class ClassMapper():
 
         return type_class
 
+    def to_element_class(self, schemaElement):
+        '''
+        Returns the schemaElements.Element() instance containing the element definition of *schemaElement*
+
+        Args:
+            schemaElement (dict): schema model element definition
+        '''
+
+        element_class = schemaElements.Element()
+        dependencies = {
+            'types': {}
+        }
+        value = {}
+
+        if 'anonymous' in schemaElement['type'] and schemaElement['type']['anonymous']:
+            logging.debug('Skipping anonymous definition')
+        else:
+            element_class.name = schemaElement['name']
+            if schemaElement['type']['ns'] == self.schemamodel['tns']:
+                element_class.value = schemaElement['type']
+                dependencies['types'][schemaElement['type']['name']] = schemaElement['type']
+            elif schemaElement['type']['ns'] == 'http://www.w3.org/2001/XMLSchema':
+                element_class.value = schemaElement['type']
+            else:
+                logging.debug('Unexpected type namespace "{}" for element "{}"'.format(schemaElement['type']['ns'], schemaElement['name']))
+            element_class.serialiser = ' + '.join(['"<{}>"'.format(element_class.name), 'this.value', '"</{}>"'.format(element_class.name)])
+            element_class.dependencies = dependencies
+            return element_class
+
     def generate_toXML_method(self, t):
         '''
         Returns the return statement for the serialisation method of the Type class
+
+        Args:
+            t (schemaElement.Type): type definition
         '''
         concat = []
         for field_name in t.fields:
@@ -198,8 +215,7 @@ class ClassMapper():
                     parts = []
                     # check for type namespace, if tns then element['name'].toXML() else element or something else when anonymous
                     if 'anonymous' in element['type']:
-                        logging.debug('Implement anonymous type definiton serialisation!')
-                        pass
+                        logging.debug('Anonymous type definitions are not implemented yet!')
                     else:
                         if element['type']['ns'] == self.schemamodel['tns']:
                             parts.append('this.' + element['name'] + '.toXML()')

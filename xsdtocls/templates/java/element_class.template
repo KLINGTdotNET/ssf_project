@@ -1,0 +1,21 @@
+package ${package};
+
+% for dependency in dependencies['types']:
+import ${package}.${to_camel_case(dependency)};
+% endfor
+
+class ${name} {
+    ${modifiers['value']} ${to_camel_case(value['name']) if value['ns'] == tns else typemap[value['name']]} value;
+
+    ${modifiers['methods']} void setValue(${to_camel_case(value['name']) if value['ns'] == tns else typemap[value['name']]} value) {
+        this.value = value;
+    }
+
+    ${modifiers['methods']} ${to_camel_case(value['name']) if value['ns'] == tns else typemap[value['name']]} getValue() {
+        return this.value;
+    }
+
+    ${modifiers['methods']} String toXML() {
+        return ${serialiser};
+    }
+}
