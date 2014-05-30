@@ -10,6 +10,9 @@ class ClassMapper():
         self.schemamodel = schemamodel
 
     def map(self):
+        '''
+        Returns a dict with the mapped attributes, elements and types
+        '''
         model = {
             'tns': self.schemamodel['tns'],
             'attributes': {},
@@ -17,22 +20,20 @@ class ClassMapper():
             'types': {}
         }
 
-        for type in self.schemamodel['types']:
-            t = self.to_type_class(type)
+        for type_definition in self.schemamodel['types']:
+            t = self.to_type_class(type_definition)
             toXML = self.generate_toXML_method(t)
             model['types'][t.name] = t
 
         for element in self.schemamodel['elements']:
             '''
-            if element['type']['ns'] == model['tns']:
-                pass
-            else:
-                logging.debug(element)
+            refactor to seperate method that replaces the type declaration with its definition
             '''
             if 'anonymous' in element['type']:
-                pp.pprint(element)
+                # type definition is already included
+                pass
             elif element['type']['ns'] == model['tns']:
-                # replace type with declaration
+                # replace type with definition
                 t = None
                 for schemaType in self.schemamodel['types']:
                     if schemaType['name'] == element['type']['name']:
@@ -41,12 +42,9 @@ class ClassMapper():
                     logging.debug('Could not find: "{}"'.format(element['type']))
                 else:
                     element['type'] = t
-                    pp.pprint(element)
             else:
-                pp.pprint(element)
-
+                pass
         model['elements'] = self.schemamodel['elements']
-
         return model
 
     def resolve_reference(self, ref):
@@ -74,6 +72,9 @@ class ClassMapper():
         #ns = tns
         fields = {}
         ordering = []
+        dependencies = {
+            'types': {}
+        }
         if 'attributes' in schemaType:
             for attribute in schemaType['attributes']:
                 if 'ref' in attribute:
@@ -83,11 +84,17 @@ class ClassMapper():
                         'type': resolved['type'],
                         'isAttribute': True
                     }
+                    if resolved['type']['ns'] == self.schemamodel['tns']:
+                        if 'anonymous' not in resolved['type']:
+                            dependencies['types'][resolved['type']['name']] = resolved['type']
                 else:
                     fields[attribute['name']] = {
                         'type': attribute['type'],
                         'isAttribute': True
                     }
+                    if attribute['type']['ns'] == self.schemamodel['tns']:
+                        if 'anonymous' not in attribute['type']:
+                            dependencies['types'][attribute['type']['name']] = attribute['type']
         if 'content' in schemaType:
             content = schemaType['content']
             for key in content:
@@ -99,7 +106,6 @@ class ClassMapper():
                 elif key == 'base':
                     base = content['base']
                     if len(content) == 1:
-                        # base declares only the type inside of the element
                         fields['value'] = base['name']
                 elif key == 'extends':
                     base = content['extends']
@@ -109,6 +115,9 @@ class ClassMapper():
                             'type': attribute['type'],
                             'isAttribute': True
                         }
+                        if attribute['type']['ns'] == self.schemamodel['tns']:
+                            if 'anonymous' not in attribute['type']:
+                                dependencies['types'][attribute['type']['name']] = attribute['type']
                 elif key == 'ordering':
                     for order in content[key]:
                         if order == 'sequence':
@@ -120,27 +129,66 @@ class ClassMapper():
                                         'type': element['type'],
                                         'occurance': element['occurance']
                                     }
+                                    if element['type']['ns'] == self.schemamodel['tns']:
+                                        if 'anonymous' not in element['type']:
+                                            dependencies['types'][element['type']['name']] = element['type']
                                 elif 'ref' in element:
                                     # resolve reference on element
-                                    self.resolve_reference(element['ref'])
+                                    resolved_element = self.resolve_reference(element['ref'])
+                                    if resolved_element:
+                                        fields[resolved_element['name']] = {
+                                            'type': resolved_element['type'],
+                                            'occurance': resolved_element['occurance']
+                                        }
+                                    if resolved_element['type']['ns'] == self.schemamodel['tns']:
+                                        if 'anonymous' not in resolved_element['type']:
+                                            dependencies['types'][resolved_element['type']['name']] = resolved_element['type']
                                 else:
                                     logging.debug('Unexpected element: "{}"'.format(element))
-                        else:
-                            logging.debug(order)
                 else:
                     logging.debug('Unexpected element "{}"'.format(key))
         if 'ordering' in schemaType:
             ordering = schemaType['ordering']
-        type = schemaElements.Type()
-        type.name = name
-        type.base_class = base
-        #type.ns = tns
-        type.fields = fields
-        type.ordering = ordering
+            if 'sequence' in schemaType['ordering']:
+                for seq_element in  schemaType['ordering']['sequence']:
+                    if 'anonymous' not in seq_element['type']:
+                        if seq_element['type']['ns'] == self.schemamodel['tns']:
+                            dependencies['types'][seq_element['type']['name']] = seq_element['type']
+        type_class = schemaElements.Type()
+        type_class.name = name
+        type_class.base_class = base
+        if base and base['ns'] == self.schemamodel['tns']:
+            dependencies['types'][base['name']] = base
+        type_class.fields = fields
+        type_class.ordering = ordering
+        type_class.serialiser = self.generate_toXML_method(type_class)
+        type_class.dependencies = dependencies
 
-        #pp.pprint((name, base, fields, ordering))
+        pp.pprint((name, base, fields, ordering))
 
-        return type
+        return type_class
 
     def generate_toXML_method(self, t):
-        pass
+        concat = []
+        for field_name in t.fields:
+            # only one field?
+            field_type = t.fields[field_name]
+            concat.append(field_name + '.toString()')
+        for order in t.ordering:
+            if order == 'sequence':
+                sequence = t.ordering[order]
+                for element in sequence:
+                    parts = []
+                    # check for type namespace, if tns then element['name'].toXML() else element or something else when anonymous
+                    if 'anonymous' in element['type']:
+                        logging.debug('Implement anonymous type definiton serialisation!')
+                        pass
+                    else:
+                        if element['type']['ns'] == self.schemamodel['tns']:
+                            parts.append('this.' + element['name'] + '.toXML()')
+                        else:
+                            parts.append('"<{}>"'.format(element['name']))
+                            parts.append('this.' + element['name'])
+                            parts.append('"</{}>"'.format(element['name']))
+                    concat.append(' + '.join(parts))
+        return ' + '.join(concat)

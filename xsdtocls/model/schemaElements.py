@@ -19,6 +19,8 @@ class Type():
         self._modifiers = [ 'public' ]
         self._fields = {} # elements?
         self._ordering = []
+        self._serialiser = ''
+        self._dependencies = {}
 
     @property
     def name(self):
@@ -67,3 +69,17 @@ class Type():
     @ordering.setter
     def ordering(self, value):
         self._ordering = value
+
+    @property
+    def serialiser(self):
+        return self._serialiser
+    @serialiser.setter
+    def serialiser(self, value):
+        self._serialiser = value
+
+    @property
+    def dependency(self):
+        return self._dependency
+    @dependency.setter
+    def dependency(self, value):
+        self._dependency = value

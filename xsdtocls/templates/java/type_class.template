@@ -1,0 +1,56 @@
+package ${package};
+
+% for dependency in dependencies['types']:
+import ${package}.${to_camel_case(dependency)};
+% endfor
+
+class ${name} ${"extends " + base['name'] if base and base['ns'] == tns else ''} {
+
+    % for f in fields:
+    private ${typemap[fields[f]]} ${f};
+    % endfor
+
+    % if 'sequence' in ordering:
+        % for e in ordering['sequence']:
+            % if 'anonymous' not in e['type']:
+                % if e['type']['ns'] == tns:
+    private ${to_camel_case(e['type']['name'])} ${e['name']};
+                % else:
+    private ${typemap[e['type']['name']]} ${e['name']};
+                % endif
+            % else:
+                ## anonymous type declarations have to be handled here
+            % endif
+        % endfor
+    % endif
+
+    % for f in fields:
+    public void set${to_camel_case(f)}(${typemap[fields[f]]} value) {
+        this.${f} = value;
+    }
+
+    public ${typemap[fields[f]]} get${to_camel_case(f)}() {
+        return this.${f};
+    }
+    % endfor
+
+    % if 'sequence' in ordering:
+        % for e in ordering['sequence']:
+            % if 'anonymous' not in e['type']:
+    public void set${to_camel_case(e['name'])}(${to_camel_case(e['type']['name']) if e['type']['ns'] == tns else typemap[e['type']['name']]} ${e['name']}) {
+        this.${e['name']} = ${e['name']};
+    }
+
+    public ${to_camel_case(e['type']['name']) if e['type']['ns'] == tns else typemap[e['type']['name']]} get${to_camel_case(e['name'])}() {
+        return this.${e['name']};
+    }
+            % else:
+                ## anonymous type declarations have to be handled here
+            % endif
+        % endfor
+    % endif
+
+    public String toXML() {
+        return ${serialiser};
+    }
+}
