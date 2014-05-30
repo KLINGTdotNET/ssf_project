@@ -6,11 +6,17 @@ from lxml import etree
 import logging
 
 class SchemaMapper():
+    '''
+    SchemaMapper class
+    '''
 
     def __init__(self, tree):
         self.tree = tree
 
     def map(self):
+        '''
+        Returns the XSD mapped from XML-etree input to a dictionary representation
+        '''
         root = self.tree.getroot()
         qualified = True if root.attrib['elementFormDefault'] == 'qualified' else False
         tns = root.attrib['targetNamespace'] if 'targetNamespace' in root.attrib else ''
@@ -26,7 +32,8 @@ class SchemaMapper():
         }
 
         for schema_import in [_ for _ in root.iterchildren(tag=self.qualify('import', root))]:
-            pass    # todo
+            pass
+            # is not automatically resolved in lxml, could be implemented in a future version
         for attribute in [_ for _ in root.iterchildren(tag=self.qualify('attribute', root))]:
             schema['attributes'].append(self.map_attribute(attribute))
         for simple_type in [_ for _ in root.iterchildren(tag=self.qualify('simpleType', root))]:
@@ -40,11 +47,17 @@ class SchemaMapper():
 
     def map_import(self, schema_import):
         '''
-        lxml resolves schema imports only when a validator is created through etree.XMLSchema()
+        Note: lxml resolves schema imports only when a validator is created through etree.XMLSchema()
         '''
-        return schema_import.attrib['namespace']
+        raise NotImplementedError('Importing of referenced schemas is not implemented yet!')
 
     def map_type(self, type, nsmap):
+        '''
+        Returns the mapped type declaration
+
+        Args:
+            type (str): Type declaration, f.e. xsd:long where *xsd* is the namespace prefix and *long* the type name
+        '''
         if ':' in type:
             prefix, name = type.split(':')
         else:
@@ -63,7 +76,13 @@ class SchemaMapper():
 
     def map_attribute(self, attribute):
         '''
+        Returns the mapped attribute
+
         see http://www.w3.org/TR/xmlschema-1/#cAttribute_Declarations
+
+        Args:
+            attribute (lxml.etree._Element):
+                Element object that contains a attribute definition
         '''
         content = {}
         if 'name' in attribute.attrib:
@@ -101,7 +120,12 @@ class SchemaMapper():
 
     def map_simple_type(self, simple):
         '''
+        Returns the mapped simpleType
+
         see http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#element-simpleType
+
+        Args:
+            simple (lxml.etree._Element): Element object that stores the simpleType definition
         '''
         content = {}
         parent = simple.getparent()
@@ -126,8 +150,13 @@ class SchemaMapper():
 
     def simple_type_restriction(self, restriction):
         '''
+        Returns mapped simpleType restriction definiton
+
         see http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#element-restriction
         or http://msdn.microsoft.com/en-us/library/ms256219(v=vs.110).aspx
+
+        Args:
+            restriction (lxml.etree._Element): Element containing the simpleType restriction
         '''
         content = {
             'base': self.map_type(restriction.attrib['base'], restriction.nsmap)
@@ -164,20 +193,31 @@ class SchemaMapper():
                     logging.debug('Unsupported tag "{}" in SimpleType'.format(child.tag))
         return content
 
-    def simple_type_list(self, node):
+    def simple_type_list(self, listElement):
+        '''
+        Returns mapped simpleType list
+
+        Args:
+            listElement (lxml.etree._Element): Element that contains the simpleType list definition
+        '''
         content = {}
-        if 'itemType' in node.attrib:
-            content['type'] = node.attrib['itemType']
+        if 'itemType' in listElement.attrib:
+            content['type'] = listElement.attrib['itemType']
         else:
             logging.debug('List without itemType attribute!')
         return content
 
     def simple_type_union(self):
-        logging.warn('Implement me!')
+        raise NotImplementedError('SimpleType unions are not implemented yet!')
 
     def map_complex_type(self, complex):
         '''
+        Returns the mapped complexType
+
         see http://www.w3.org/TR/xmlschema-1/#Complex_Type_Definitions
+
+        Args:
+            complex (lxml.etree._Element): Element that contains a complexType definition
         '''
         content = {
             'anonymous': False
@@ -216,6 +256,12 @@ class SchemaMapper():
         return content
 
     def map_complex_content(self, complex):
+        '''
+        Returns the mapped complexContent
+
+        Args:
+            complex (lxml.etree._Element): Element that contains the complexType definition
+        '''
         content = {}
         if complex[0].tag == self.qualify('extension', complex[0]):
             content['extends'] = {
@@ -237,6 +283,13 @@ class SchemaMapper():
         return content
 
     def map_sequence(self, element):
+        '''
+        Returns the mapped sequence definition
+
+        Args:
+            element (lxml.etree._Element):
+                Element that contains a complexType sequence definition
+        '''
         ordering = {}
         # elements must appear in that order
         for child in element:
@@ -274,7 +327,12 @@ class SchemaMapper():
 
     def map_simple_content(self, simple):
         '''
+        Returns the mapped simpleType
+
         see http://msdn.microsoft.com/de-de/library/ms256106(v=vs.110).aspx
+
+        Args:
+            simple (lxml.etree._Element): Element containing the simpleContent definition
         '''
         content = {}
         unqualified = self.unqualify(simple[0].tag, simple[0])
@@ -302,6 +360,12 @@ class SchemaMapper():
         return content
 
     def map_element(self, element):
+        '''
+        Returns the mapped element
+
+        Args:
+            element (lxml.etree._Element): Element containing a XML Element definition
+        '''
         content = {
             'occurance': {
                 'min': 1,
@@ -343,6 +407,9 @@ class SchemaMapper():
         return content
 
     def qualify(self, name, node):
+        '''
+        Returns the qualified name of a node, f.e. "{http://www.w3.org/2001/XMLSchema}attribute"
+        '''
         if node.prefix in node.nsmap:
             return '{{{}}}{}'.format(node.nsmap[node.prefix], name)
         else:
@@ -350,6 +417,9 @@ class SchemaMapper():
             return ''
 
     def unqualify(self, name, node):
+        '''
+        Removes the namespace declaration from an node name
+        '''
         if node.prefix in node.nsmap:
             return name.replace('{{{}}}'.format(node.nsmap[node.prefix]), '')
         else:

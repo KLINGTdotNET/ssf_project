@@ -1,12 +1,16 @@
 import logging
 from model import schemaElements
 
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
-
 class ClassMapper():
+    '''
+    ClassMapper, contains methods to map the schema model to the class model
+    '''
 
     def __init__(self, schemamodel):
+        '''
+        Args:
+            schemamodel (dict): Output of schemamapper
+        '''
         self.schemamodel = schemamodel
 
     def map(self):
@@ -48,6 +52,12 @@ class ClassMapper():
         return model
 
     def resolve_reference(self, ref):
+        '''
+        Resolves the reference pointed to by *ref*
+
+        Args:
+            ref (dict): type reference
+        '''
         if ref['ns'] == self.schemamodel['tns']:
             for type in self.schemamodel['types']:
                 if type['name'] == ref['reference']:
@@ -67,6 +77,12 @@ class ClassMapper():
                 }
 
     def to_type_class(self, schemaType):
+        '''
+        Returns the schemaElements.Type() instance containing the type definition of *schemaType*
+
+        Args:
+            schemaType (dict): schema model type definition
+        '''
         name = schemaType['name']
         base = None
         #ns = tns
@@ -164,11 +180,12 @@ class ClassMapper():
         type_class.serialiser = self.generate_toXML_method(type_class)
         type_class.dependencies = dependencies
 
-        pp.pprint((name, base, fields, ordering))
-
         return type_class
 
     def generate_toXML_method(self, t):
+        '''
+        Returns the return statement for the serialisation method of the Type class
+        '''
         concat = []
         for field_name in t.fields:
             # only one field?
@@ -190,5 +207,5 @@ class ClassMapper():
                             parts.append('"<{}>"'.format(element['name']))
                             parts.append('this.' + element['name'])
                             parts.append('"</{}>"'.format(element['name']))
-                    concat.append(' + '.join(parts))
+                        concat.append(' + '.join(parts))
         return ' + '.join(concat)
