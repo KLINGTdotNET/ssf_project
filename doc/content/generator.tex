@@ -1,30 +1,35 @@
 \section{Codegenerator}
 
+\myQuote{Ein Codegenerator ist ein Programm, welches aus einer höhersprachigen Spezifikation\footnote{mit anderen Worten: auf einem höheren Abstraktionslevel als das der zur Implementierung verwendetenProgrammiersprache}, einer Software oder eines Teilaspektes die Implementierung erzeugt.}{nach \cite[S. 333]{eisenecker}}
+
 Im Allgemeinen wird der Begriff \enquote{Generator} für verschiedene Technologien verwendet, u.a. Compiler u. Präprozessoren, Template-Metaprogramming in C++ und natürlich Codegeneratoren.
 
-\myQuote{Ein Codegenerator ist ein Programm, welches aus einer höhersprachigen Spezifikation\footnote{mit anderen Worten: auf einem höheren Abstraktionslevel als das der zur Implementierung verwendetenProgrammiersprache}, einer Software oder eines Teilaspektes die Implementierung erzeugt.}{nach \cite{eisenecker}}
+Der hier beschriebene Generator erzeugt ausführbaren Code, durch die Überführung einer XML Schemabeschreibung in ein internes Datenmodell welches als Eingabe für eine Template-Engine dient (siehe \cref{sec:template} auf \pageref{sec:template}).
 
-Der Codegenerierungsprozess erfolgt durch die folgenden Schritte:
+Der Codegenerierungsprozess erfolgt dabei durch die folgenden Schritte:
 
 \begin{enumerate}
-    \item Einlesen der Spezifikation (\gls{XSD})
+    \item Einlesen und validieren der Spezifikation (\gls{XSD})
     \item Überführen der wesentlichen Informationen der Spezifikation in ein Schemamodell
-    \item Erstellung eines Klassenmodells aus dem Datenmodell des Schemas
-    \item Rendern des Quellcodes durch die Template-Engine mit dem Klassenmodell als Eingabe
+    \item Befüllen des Eingabemodells des Generators (hier als Klassenmodell bezeichnet) mit den Spezifikationen aus dem Schemamodell
+    \item Analysieren von Abhängigkeiten innerhalb des Klassenmodells
+    \item Rendern des Quellcodes durch die Template-Engine
 \end{enumerate}
 
 \subsection{Datenmodell}
 
 Das Datenmodell beinhaltet die Informationen der Spezifikation und bildet somit die Basis für den Codegenerator.
-Vom Generator werden zwei Datenmodelle zur Erzeugung des Quellcodes verwendet, das Schemamodell (\cref{sec:schemamodel}) und das Klassenmodell (\cref{sec:classmodel}).
+Vom Generator werden zwei Datenmodelle zur Erzeugung des Quellcodes verwendet, dass Schemamodell (\cref{sec:schemamodel}) und das Klassenmodell (\cref{sec:classmodel}).
 
 \subsubsection{Schemamodell}
 \label{sec:schemamodel}
 
-Das Schemamodell kapselt die in der Spezifikation enthaltenen Informationen, in diesem Fall die Regeln aus der \gls{XSD}-Datei, welche die Struktur der XML-Daten festlegen.
+Das Schemamodell kapselt die in der Spezifikation enthaltenen Informationen, in diesem Fall die Regeln aus der \gls{XSD}-Datei. Im ersten Schritt wird durch einen XML-Parser aus dem \gls{XSD} ein Objektbaum erzeugt. Gleichzeitig wird durch den Parser (lxml \cite{lxml}) geprüft ob die Spezifikation selbst wohlgeformtes \gls{XML} ist.
+Der vom Parser erzeugte Baum enthält noch viele \gls{XML} spezifische Informationen welche im folgenden \emph{mapping} Schritt wegfallen. Das \texttt{schemamapper} Modul des Codegenerators iteriert hierfür über den Objektbaum und extrahiert die relevanten Informationen, wie bspw. Element- und Typdefinitionen welche darauffolgend in das Schemamodell eingefügt werden. Das Schemamodell selbst ist ein Python \emph{Dictionary}\footnote{auch als \emph{assoziatives Array} o. \emph{Map} bezeichnet} welches Angaben über die definierten Namensräume sowie die Attribut-, Element- u. Typdefinitionen enthält.
 
 \subsubsection{Klassenmodell}
 \label{sec:classmodel}
+
 
 Durch das Klassenmodell werden die Informationen aus dem Schemamodell auf die Konstrukte der Zielsprache abgebildet.
 
@@ -33,6 +38,41 @@ Serialisierer/Deserialisierer
 \subsection{Architektur}
 
 \subsection{Template-Engine}
+\label{sec:template}
+\cite{mako}
+
+\begin{lstlisting}[language=Java, label=lst:javaExample, caption=Beispiel für eine generierte Java-Datei]
+package com.facebook.api;
+
+import com.facebook.api.Uid;
+import com.facebook.api.Vid;
+import com.facebook.api.Time;
+
+class VideoTag  {
+
+    private Vid vid;
+    private Uid subject;
+    private Time created_time;
+    private Time updated_time;
+
+
+    public void setVid(Vid vid) {
+        this.vid = vid;
+    }
+
+    public Vid getVid() {
+        return this.vid;
+    }
+    ...
+    public Time getUpdatedTime() {
+        return this.updated_time;
+    }
+
+    public String toXML() {
+        return this.vid.toXML() + this.subject.toXML() + this.created_time.toXML() + this.updated_time.toXML();
+    }
+}
+\end{lstlisting}
 
 \subsection{Alternative zum templatebasierten Ansatz}
 
