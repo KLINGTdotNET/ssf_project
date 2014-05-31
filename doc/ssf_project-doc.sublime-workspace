@@ -412,10 +412,10 @@
 	"buffers":
 	[
 		{
-			"file": "README.md",
+			"file": "content/main.tex",
 			"settings":
 			{
-				"buffer_size": 116,
+				"buffer_size": 7317,
 				"line_ending": "Unix"
 			}
 		}
@@ -512,6 +512,9 @@
 	},
 	"file_history":
 	[
+		"/home/andreas/personal/dev/python/ssf_project/doc/content/main.bib",
+		"/home/andreas/personal/dev/python/ssf_project/doc/make.sh",
+		"/home/andreas/personal/dev/python/ssf_project/doc/ssf_project-doc.sublime-project",
 		"/home/andreas/personal/dev/python/ssf_project/doc/build/main.toc",
 		"/home/andreas/personal/dev/python/ssf_project/doc/build/main.xdv",
 		"/home/andreas/personal/dev/python/ssf_project/doc/build/main.tex",
@@ -526,7 +529,6 @@
 		"/home/andreas/personal/dev/python/ssf_project/doc/build/main.bcf",
 		"/home/andreas/personal/dev/python/ssf_project/doc/build/main.bbl",
 		"/home/andreas/personal/dev/python/ssf_project/doc/build/main.aux",
-		"/home/andreas/personal/dev/python/ssf_project/doc/make.sh",
 		"/home/andreas/personal/dev/python/ssf_project/doc/build/glossary.aux",
 		"/home/andreas/personal/dev/python/ssf_project/resources/spreadshirt.xsd",
 		"/home/andreas/personal/dev/python/ssf_project/tests/test_tools.py",
@@ -563,7 +565,6 @@
 		"/home/andreas/personal/edu/Uni-Leipzig/2_Semester/Stringologie/projekt/projekt_vorstellung.",
 		"/home/andreas/personal/dev/python/ssf_project/xsdtocls/processor/mapper.py",
 		"/home/andreas/personal/dev/python/ssf_project/tests/resources/sample.xsd",
-		"/home/andreas/personal/dev/python/ssf_project/doc/content/main.bib",
 		"/home/andreas/personal/dev/python/ssf_project/xsdtocls/processor/parser.py",
 		"/home/andreas/personal/dev/python/ssf_project/xsdtocls/generator/java_renderer.py",
 		"/home/andreas/.cache/.fr-sNwjwL/discogs_20140501_labels.xml",
@@ -638,8 +639,7 @@
 		"/home/andreas/personal/dev/python/klingt.net/src/cache/.mako.tmp/base.tmpl.py",
 		"/home/andreas/personal/dev/python/klingt.net/src/themes/klingt.net-bootstrap3/templates/post.tmpl",
 		"/home/andreas/personal/dev/python/klingt.net/src/output/archive.html",
-		"/home/andreas/personal/dev/python/klingt.net/src/posts/another-test-post.rst",
-		"/home/andreas/personal/dev/python/klingt.net/src/posts/my-first-post.rst"
+		"/home/andreas/personal/dev/python/klingt.net/src/posts/another-test-post.rst"
 	],
 	"find":
 	{
@@ -813,27 +813,29 @@
 			[
 				{
 					"buffer": 0,
-					"file": "README.md",
-					"semi_transient": true,
+					"file": "content/main.tex",
+					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 116,
+						"buffer_size": 7317,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								116,
-								116
+								3791,
+								3791
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Markdown/Markdown.tmLanguage"
+							"syntax": "Packages/LaTeX/LaTeX.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 874.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -892,6 +894,10 @@
 		"height": 0.0,
 		"selected_items":
 		[
+			[
+				"mian",
+				"content/main.tex"
+			],
 			[
 				"cli",
 				"xsdtocls/tools/cli.py"

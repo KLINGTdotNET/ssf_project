@@ -1,0 +1,53 @@
+\section{Einführung}
+
+Dieses Dokument beschreibt den im Rahmen der Vorlesung \emph{Softwaresystemfamilien} erstellten Codegenerator, welcher aus einer abstrakten Beschreibung von Datenformaten in Form einer \gls{XML} Schemabeschreibung (nachfolgend \gls{XSD}) ein Java Package erzeugt.
+
+\subsection{Motivation}
+
+Um Daten mit Webservices austauschen zu können, müssen diese für den Übertragungsweg serialisiert werden. In der Regel wird dabei \gls{XML} als Format für die serialisierten Daten unterstützt. Die Struktur der serialisierten Daten, die von dem Dienst empfangen bzw. an diesen gesendet werden können, kann in Form einer XML Schema Description (kurz \gls{XSD}) maschinenlesbar definiert werden.
+
+Für eine effektive Verarbeitung der Daten in einer objektorientierten Programmiersprache (bspw. Java), benötigt man eine Abbildung aus der Beschreibung der XML-Darstellung in eine Darstellung als Klassen der gewählten Programmiersprache. Die manuelle Erstellung dieses \emph{Mappings} ist einerseits monoton und deshalb fehlerträchtig, sowie andererseits sehr zeitaufwendig, sollte sich die API und die verwendeten Datenstrukturen des Webservice ändern. Dies hätte zur Folge das dieses Mapping wieder manuell angepasst werden müsste.
+
+Der Generator übernimmt diese Arbeit und erzeugt aus der Beschreibung des Datenschemas automatisch die Klassendarstellung in der gewünschten Programmiersprache und erstellt zusätzlich noch eine Serialisierungsmethode um die Klassendarstellung wieder zurück nach \gls{XML} wandeln zu können\footnote{Um wirklich effektiv arbeiten zu können wäre auch noch die Generierung von Deserialisierungsmethoden wünschenswert, um eine Instanz der Klasse direkt aus der \gls{XML}-Form zu initialisieren. Leider hätte dies aber nicht mehr innerhalb der Abgabefrist implementiert werden können.}.
+
+Wirklich spannend wie dieses Konzept erst als Teilaspekt eines \emph{Generatorsystems}, welches eine komplette Client-Bibliothek für einen \gls{RESTful} Webservice erzeugt, falls dieser neben der abstrakten Beschreibung der erwarteten Datenformate auch eine Beschreibung der verfügbaren Ressourcen bereitstellt, bspw. als \gls{WADL}-Datei (siehe \cref{sec:erweiterung} S. \pageref{sec:erweiterung}).
+
+\subsection{XML Schema Description (XSD)}
+
+Die \emph{XML Schema Description} o.a. nur \emph{XML Schema} ist eine Schemabeschreibungssprache welche Regeln enthält um den Aufbau einer XML-Datei zu definieren. Üblicherweise wird diese Schemabeschreibung dazu genutzt um XML-Daten gegen dieses Schema zu validieren.
+
+\gls{XSD} erlaubt die Typdefinition für XML-Elemente und Elementattribute als einfache (sogenannte \texttt{simpleTypes}) sowie strukture Typen (\texttt{complexTypes}).
+
+\begin{lstlisting}[language=XML, caption=Minimalbeispiel für ein XML-Element]
+<element attribut="wert">Inhalt</element>
+\end{lstlisting}
+
+\begin{lstlisting}[language=XML, label=lst:simple, caption=Beispiel für einen einfachen Schematyp \cite{facebookXSD}]
+<xsd:element name="auth_createToken_response" type="auth_token" />
+
+<xsd:simpleType name="auth_token">
+    <xsd:restriction base="xsd:string" />
+</xsd:simpleType>
+
+<!-- Beispiel für eine Instanz des Typs -->
+<auth_createToken_response>foobar</auth_createToken_response>
+\end{lstlisting}
+
+\begin{lstlisting}[language=XML, label=lst:complex, caption=Beispiel für einen strukturierten Schematyp \cite{facebookXSD}]
+<xsd:element name="video_getUploadLimits_response" type="video_limits" />
+
+<xsd:complexType name="video_limits">
+    <xsd:sequence>
+        <xsd:element name="length" type="xsd:int" />
+        <xsd:element name="size" type="xsd:long" />
+    </xsd:sequence>
+</xsd:complexType>
+
+<!-- Beispiel für eine Instanz des Typs -->
+<video_getUploadLimits_response>
+    <length>21</length>
+    <size>42</size>
+</video_getUploadLimits_response>
+\end{lstlisting}
+
+Neben \gls{XSD} existieren noch weitere Schemasprachen wie \emph{RelaxNG}, die aber im Rahmen dieser Arbeit nicht behandelt werden.

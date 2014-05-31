@@ -18,12 +18,13 @@
 \usepackage{csquotes}
 \usepackage{graphicx}
 
-\usepackage[xcolor=dvipsnames]{xcolor}
+\usepackage{xcolor}
+\xdefinecolor{linkcolor}{rgb}{0.1,0.1,0.3}
 
 \usepackage{hyperref}
 \hypersetup{
             citecolor=magenta,
-            linkcolor=blue
+            linkcolor=linkcolor
             }
 
 \hypersetup{
@@ -61,3 +62,8 @@
 
 \setsansfont{Linux Biolinum}
 \setmonofont{Droid Sans Mono}
+
+%
+% custom commands
+%
+\newcommand{\myQuote}[2]{\begin{quote}\textsl{#1\hfill(#2)}\end{quote}}
