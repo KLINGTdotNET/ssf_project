@@ -20,7 +20,6 @@ class SchemaMapper():
         root = self.tree.getroot()
         qualified = True if root.attrib['elementFormDefault'] == 'qualified' else False
         tns = root.attrib['targetNamespace'] if 'targetNamespace' in root.attrib else ''
-        print('qualified: {}\ntarget-namespace: {}\nnamespaces: {}'.format(qualified, tns, root.nsmap))
 
         schema = {
             'tns': tns,
