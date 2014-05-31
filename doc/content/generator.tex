@@ -30,16 +30,28 @@ Der vom Parser erzeugte Baum enthält noch viele \gls{XML} spezifische Informati
 \subsubsection{Klassenmodell}
 \label{sec:classmodel}
 
+Um möglichst wenig Logik innerhalb der \emph{Templates} (siehe \cref{sec:template} S. \pageref{sec:template}) zu haben wird durch das Modul \texttt{classmapper} aus dem Schemamodell das Klassenmodell erzeugt. Dieses bildet die Definitionen und Regeln des Schemamodells auf Konstrukte der Zielsprache ab. Hierbei muss erwähnt werden das die XML Schemabeschreibung sehr komplexe Regeln zur Einschränkung von Wertebereichen und Definition von Typen erlaubt. Darunter fallen anonyme Typdefinitionen sowie Auftrittsreihenfolgen u. -häufigkeiten für Elemente \cite{XMLschema}. Dieses Regeln sind im Schemamodell enthalten, werden aber im Klassenmodell nicht übernommen da deren Abbildung den zeitlichen Rahmen diese Projektes übersteigen würde.
 
-Durch das Klassenmodell werden die Informationen aus dem Schemamodell auf die Konstrukte der Zielsprache abgebildet.
-
-Serialisierer/Deserialisierer
+Durch das \texttt{classmapper} Modul werden die Element- und Typdefinitionen auf Abhängigkeiten untersucht und diese als \texttt{dependencies} Dictionary dem jeweiligen Klassenmodell hinzugefügt. Da aus jeder Element- und Typdefinition eine eigene Java-Klasse generiert wird müssen darin verwendete Typen, die in einer anderen Klasse-/Datei definiert sind, importiert werden. Diese Importanweisungen werden aus den \texttt{dependencies} generiert (siehe Zeile 3-5 in \cref{lst:javaExample}, S. \pageref{lst:javaExample}).
+Außerdem werden referenzierte Typen aufgelöst und durch deren Definition ersetzt. Zusätzlich werden vom \texttt{classmapper} auch Serialiserungsmethoden erstellt, die aus der erzeugten Java-Klasse wieder \gls{XML} generieren.
 
 \subsection{Architektur}
 
 \subsection{Template-Engine}
 \label{sec:template}
-\cite{mako}
+
+Eine Template-Engine ist ein Textersetzungssystem was Templates (Vorlagen) verarbeitet und darin enthaltene Platzhalter durch andere Inhalte ersetzt. Das \texttt{javaRenderer} Modul dieses Codegenerators verwendet dabei die \emph{Mako Template-Engine} \cite{mako}. Als Eingabe dient dabei das Klassenmodell mit welchem die Templatedateien für Element- bzw. Typdefinitionen befüllt werden. \cref{lst:javaExample} zeigt Java-Klasse welche aus der Typdefinition von \cref{lst:xsdVideoTag} generiert wurde. Das \texttt{javaRenderer} Modul übergibt der Template-Engine Methoden zur Formatierung von Klassen- und Methodennamen um bestimmte Namenskonventionen einzuhalten. In diesem Fall Methoden zur Erzeugung von \emph{camel-cased} Namen für Klassen und Methodennamen. Dies ist für die Funktionsweise nicht notwendigt, macht den erzeugten Code aber lesbarer.
+
+\begin{lstlisting}[language=XML, label=lst:xsdVideoTag, caption=...]
+<xsd:complexType name="video_tag">
+  <xsd:sequence>
+    <xsd:element name="vid" type="vid" />
+    <xsd:element name="subject" type="uid" />
+    <xsd:element name="created_time" type="time" />
+    <xsd:element name="updated_time" type="time" />
+  </xsd:sequence>
+</xsd:complexType>
+\end{lstlisting}
 
 \begin{lstlisting}[language=Java, label=lst:javaExample, caption=Beispiel für eine generierte Java-Datei]
 package com.facebook.api;
@@ -69,7 +81,9 @@ class VideoTag  {
     }
 
     public String toXML() {
-        return this.vid.toXML() + this.subject.toXML() + this.created_time.toXML() + this.updated_time.toXML();
+        return this.vid.toXML() + this.subject.toXML()
+            + this.created_time.toXML()
+            + this.updated_time.toXML();
     }
 }
 \end{lstlisting}
