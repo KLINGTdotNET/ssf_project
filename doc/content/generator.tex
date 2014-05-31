@@ -35,14 +35,14 @@ Um möglichst wenig Logik innerhalb der \emph{Templates} (siehe \cref{sec:templa
 Durch das \texttt{classmapper} Modul werden die Element- und Typdefinitionen auf Abhängigkeiten untersucht und diese als \texttt{dependencies} Dictionary dem jeweiligen Klassenmodell hinzugefügt. Da aus jeder Element- und Typdefinition eine eigene Java-Klasse generiert wird müssen darin verwendete Typen, die in einer anderen Klasse-/Datei definiert sind, importiert werden. Diese Importanweisungen werden aus den \texttt{dependencies} generiert (siehe Zeile 3-5 in \cref{lst:javaExample}, S. \pageref{lst:javaExample}).
 Außerdem werden referenzierte Typen aufgelöst und durch deren Definition ersetzt. Zusätzlich werden vom \texttt{classmapper} auch Serialiserungsmethoden erstellt, die aus der erzeugten Java-Klasse wieder \gls{XML} generieren.
 
-\subsection{Architektur}
-
 \subsection{Template-Engine}
 \label{sec:template}
 
-Eine Template-Engine ist ein Textersetzungssystem was Templates (Vorlagen) verarbeitet und darin enthaltene Platzhalter durch andere Inhalte ersetzt. Das \texttt{javaRenderer} Modul dieses Codegenerators verwendet dabei die \emph{Mako Template-Engine} \cite{mako}. Als Eingabe dient dabei das Klassenmodell mit welchem die Templatedateien für Element- bzw. Typdefinitionen befüllt werden. \cref{lst:javaExample} zeigt Java-Klasse welche aus der Typdefinition von \cref{lst:xsdVideoTag} generiert wurde. Das \texttt{javaRenderer} Modul übergibt der Template-Engine Methoden zur Formatierung von Klassen- und Methodennamen um bestimmte Namenskonventionen einzuhalten. In diesem Fall Methoden zur Erzeugung von \emph{camel-cased} Namen für Klassen und Methodennamen. Dies ist für die Funktionsweise nicht notwendigt, macht den erzeugten Code aber lesbarer.
+Eine Template-Engine ist ein Textersetzungssystem was Templates (Vorlagen) verarbeitet und darin enthaltene Platzhalter durch andere Inhalte ersetzt. Das \texttt{javaRenderer} Modul dieses Codegenerators verwendet dabei die \emph{Mako Template-Engine} \cite{mako}. Als Eingabe dient dabei das Klassenmodell mit welchem die Templatedateien für Element- bzw. Typdefinitionen befüllt werden. \cref{lst:javaExample} zeigt Java-Klasse welche aus der Typdefinition von \cref{lst:xsdVideoTag} generiert wurde. Das \texttt{javaRenderer} Modul übergibt der Template-Engine Methoden zur Formatierung von Klassen- und Methodennamen um bestimmte Namenskonventionen einzuhalten. In diesem Fall Methoden zur Erzeugung von \emph{camel-cased} Namen für Klassen und Methodennamen. Dies ist für die Funktionsweise nicht notwendig, unterstützt aber die Lesbarkeit und Akzeptanz des erzeugten Codes.
+Der Name des erzeugten Java Packages wird ebenso wie die Ordnerstruktur\footnote{Nach \href{http://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html}{Maven - Standart Directory Layout}} des Projektes aus der Angabe des Zielnamensraums (targetnamespace) in der Schemadefinition erzeugt. Aus dem Zielnamensraum \texttt{http://api.facebook.com/1.0/} würde folgende Ornderstruktur generiert werden: \\
+\texttt{\%ausgabepfad\%/.api.facebook.com/1\_0/src/main/java/com/facebook/api/}.
 
-\begin{lstlisting}[language=XML, label=lst:xsdVideoTag, caption=...]
+\begin{lstlisting}[language=XML, label=lst:xsdVideoTag, caption=Beispiel für eine XSD Typdefinition aus \cite{facebookXSD}]
 <xsd:complexType name="video_tag">
   <xsd:sequence>
     <xsd:element name="vid" type="vid" />
@@ -53,7 +53,7 @@ Eine Template-Engine ist ein Textersetzungssystem was Templates (Vorlagen) verar
 </xsd:complexType>
 \end{lstlisting}
 
-\begin{lstlisting}[language=Java, label=lst:javaExample, caption=Beispiel für eine generierte Java-Datei]
+\begin{lstlisting}[language=Java, label=lst:javaExample, caption=Beispiel für eine generierte Java-Datei (getter und setter gekürzt)]
 package com.facebook.api;
 
 import com.facebook.api.Uid;
@@ -90,15 +90,17 @@ class VideoTag  {
 
 \subsection{Alternative zum templatebasierten Ansatz}
 
-Alternativ zur Verwendung einer \gls{template-engine} ist die Erstellung eines Modells für die Zielsprache des zu erzeugenden Codes möglich. Dieses \emph{Sprachenmodell} müsste dabei die Konstrukte der Zielsprache enthalten und den zu erzeugenden Code in Form eines \gls{AST} beinhalten.
+Alternativ zur Verwendung einer \gls{template-engine} ist die Erstellung eines Modells für die Zielsprache des zu erzeugenden Codes möglich. Dieses \emph{Sprachenmodell} müsste dabei die Konstrukte der Zielsprache enthalten und den zu erzeugenden Code bspw. in Form eines \gls{AST} beinhalten.
 Um aus dem Syntaxbaum Quellcode erzeugen können ist zusätzlich ein \emph{Renderer} zu implementieren. Gegenüber der Verwendung von Templates bietet dieser Ansatz folgende Vorteile:
 
 \begin{itemize}
     \item Formatierung des erzeugten Codes über Parameter des \emph{Renderers}, bspw. Einrückungstiefe, Position von Klammern (auf neuer Zeile), \ldots
     \item Optimierung des zu erzeugenden Codes durch Analyse des \gls{AST}
+    \item Trennung von Syntax (Renderer) und Semantik (Sprachenmodell)
+    \item Implementierung einer neuen Zielsprache nur durch Anpassung des Renders
 \end{itemize}
 
-Ein Nachteil ist der erhöhte Implementierungsaufwand.
+Ein Nachteil ist der wesentlich höhere Implementierungsaufwand.
 
 \section{Installation und Verwendung}
 

@@ -3,6 +3,7 @@
 Dieses Dokument beschreibt den im Rahmen der Vorlesung \emph{Softwaresystemfamilien} erstellten Codegenerator, welcher aus einer abstrakten Beschreibung von Datenformaten in Form einer \gls{XML} Schemabeschreibung (nachfolgend \gls{XSD}) ein Java Package erzeugt.
 
 \subsection{Motivation}
+\label{sec:motivation}
 
 Um Daten mit Webservices austauschen zu können, müssen diese für den Übertragungsweg serialisiert werden. In der Regel wird dabei \gls{XML} als Format für die serialisierten Daten unterstützt. Die Struktur der serialisierten Daten, die von dem Dienst empfangen bzw. an diesen gesendet werden können, kann in Form einer XML Schema Description (kurz \gls{XSD}) maschinenlesbar definiert werden.
 
@@ -10,7 +11,7 @@ Für eine effektive Verarbeitung der Daten in einer objektorientierten Programmi
 
 Der Generator übernimmt diese Arbeit und erzeugt aus der Beschreibung des Datenschemas automatisch die Klassendarstellung in der gewünschten Programmiersprache und erstellt zusätzlich noch eine Serialisierungsmethode um die Klassendarstellung wieder zurück nach \gls{XML} wandeln zu können\footnote{Um wirklich effektiv arbeiten zu können wäre auch noch die Generierung von Deserialisierungsmethoden wünschenswert, um eine Instanz der Klasse direkt aus der \gls{XML}-Form zu initialisieren. Leider hätte dies aber nicht mehr innerhalb der Abgabefrist implementiert werden können.}.
 
-Wirklich spannend wie dieses Konzept erst als Teilaspekt eines \emph{Generatorsystems}, welches eine komplette Client-Bibliothek für einen \gls{RESTful} Webservice erzeugt, falls dieser neben der abstrakten Beschreibung der erwarteten Datenformate auch eine Beschreibung der verfügbaren Ressourcen bereitstellt, bspw. als \gls{WADL}-Datei (siehe \cref{sec:erweiterung} S. \pageref{sec:erweiterung}).
+Wirklich spannend wie dieses Konzept erst als Teilaspekt eines \emph{Generatorsystems}, welches eine komplette Client-Bibliothek für einen \gls{RESTful} Webservice erzeugt, falls dieser neben der abstrakten Beschreibung der erwarteten Datenformate auch eine Beschreibung der verfügbaren Ressourcen bereitstellt, bspw. als \gls{WADL}-Datei (siehe \cref{sec:conclusion} S. \pageref{sec:conclusion}).
 
 \subsection{XML Schema Description (XSD)}
 

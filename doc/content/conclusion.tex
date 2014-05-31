@@ -1,8 +1,43 @@
 \section{Fazit}
+\label{sec:conclusion}
+
+Das Projekt diente hauptsächlich dazu sich mit dem Thema Codegenerierung in Python zu beschäftigen und Erfahrung mit Template-Engines und XML Bibliotheken in dieser Sprache zu sammeln. Der entstandene Generator kann auch mit überschaubaren Änderungen so erweitert werden das man ihn produktiv einsetzen kann.
+
+Wie in \cref{sec:motivation} (S. \pageref{sec:motivation}) erwähnt ist der Einsatzzweck eines solchen Generators optimalerweise als Teil eines Generatorsystems zu sehen, welches aus einer kompletten Beschreibung eines \gls{RESTful} Webservice in Form von \gls{WADL}- und \gls{XSD}-Dateien eine Client-Bibliothek erzeugt. Mit einem solchen Generatorsystem kann man bei Änderungen an der Webservice-API eine neue Client-Bibliothek generieren die den Zugriff auf alle Ressourcen erlaubt ohne das der Nutzer sich mit Details der Kommunikation auseinandersetzen muss. % näher erläutern
 
 \subsection{Erweiterungsmöglichkeiten}
 \label{sec:erweiterung}
 
-Die Implementierung zusätzlicher Zielsprachen durch die Erstellung weiterer Templates ist möglich. Eine Auswahl der Sprache für das Generat ist durch den Kommandozeilenparameter \texttt{-l/--lang LANGUAGE} bereits jetzt vorgesehen.
+Um das erzeugte Java Paket sinnvoll nutzen zu können sollten noch Deserialisierungsmethoden generiert werden, die die Typklassen direkt aus der XML-Darstellung initialisieren. Zustätzlich sollten noch mehrere Aspekte der XML Schemadefinition bei der Generierung berücksichtigt werden, wie anonyme Typdefinitionen, die man als z.B. Innere Klassen generieren könnte.
 
-Deserialisierer ...
+\begin{lstlisting}[language=XML]
+<xsd:element name="bar">
+  <xsd:complexType>
+    <xsd:sequence>
+      <xsd:element name="foo" type="xsd:decimal"/>
+    </xsd:sequence>
+    <xsd:attribute name="baz" type="xsd:boolean" />
+  </xsd:complexType>
+</xsd:element>
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java]
+class Bar {
+    class Anonym {
+        private Double foo;
+        private Boolean baz;
+        ...
+        public String toXML() {
+            return "<foo>"+this.foo+"</foo>"
+        }
+    }
+
+    private Anonym value;
+    ...
+    public String toXML() {
+        "<bar " + "baz=" + value.baz + "/>" + value.toXML() + "</bar>"
+    }
+}
+\end{lstlisting}
+
+Die Implementierung zusätzlicher Zielsprachen durch die Erstellung weiterer Templates ist vorgesehen, ebenfalls ist ein Kommandozeilenparameter \texttt{-l/--lang LANGUAGE} bereits implementiert unter dessen Berücksichtigung das \texttt{render} Modul den entsprechenden Renderer auswählt.
