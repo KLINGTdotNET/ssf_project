@@ -1,0 +1,65 @@
+\section{Einführung}
+
+\begin{frame}{Idee}
+    \begin{itemize}
+        \item Codegenerator der aus einer abstrakten Datenformatbeschreibung ein Java Package erzeugt\footnote{Implementierung existiert bereits als Teil von \href{https://jaxb.java.net/}{JAXB}}
+        \item Datenformatbeschreibung als \emph{XML Schema Description}
+        \item Ändern der Zielsprache sollte mit vertretbarem Aufwand möglich sein
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[squeeze]{Motivation}
+    \begin{block}{Probleme}
+        \begin{itemize}
+            \item Daten müssen für die Kommunikation mit Webservices serialisiert werden
+            \item in der Regel wird \textsc{Xml} unterstützt
+            \item Struktur der erwarteten Daten kann als \emph{XML Schema Description} maschinenlesbar definiert werden
+            \item \emph{Mapping} zwischen XML- und Klassendarstellung in der gewählten OO-Sprache um Daten einfach verarbeiten zu können
+        \end{itemize}
+    \end{block}
+        \begin{block}{Generatorlösung}
+        \begin{itemize}
+            \item Generierung der Klassendarstellung aus \textsc{Xsd} in der gewünschten OO-Sprache (in diesem Fall Java)
+            \item Erzeugen von Serialisierung- und Deserialisierungsmethoden\footnote{Werden derzeit nicht generiert.}
+        \end{itemize}
+        \end{block}
+\end{frame}
+
+\subsection{XSD}
+\begin{frame}{\textsc{Xml} Schema Description \textendash{} \textsc{Xsd}}
+
+\end{frame}
+
+\begin{frame}[fragile]{\textsc{Xsd} einfache Typen}
+    \begin{lstlisting}[language=XML, label=lst:simple, caption=Beispiel für einen einfachen Schematyp aus \cite{facebookXSD}]
+<xsd:element name="auth_createToken_response"
+    type="auth_token" />
+
+<xsd:simpleType name="auth_token">
+    <xsd:restriction base="xsd:string" />
+</xsd:simpleType>
+
+<!-- Beispiel für eine Instanz des Typs -->
+<auth_createToken_response>foobar</auth_createToken_response>
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{\textsc{Xsd} strukturierte Typen}
+    \begin{lstlisting}[language=XML, label=lst:complex, caption=Beispiel für einen strukturierten Schematyp aus \cite{facebookXSD}]
+<xsd:element name="video_getUploadLimits_response"
+    type="video_limits" />
+
+<xsd:complexType name="video_limits">
+    <xsd:sequence>
+        <xsd:element name="length" type="xsd:int" />
+        <xsd:element name="size" type="xsd:long" />
+    </xsd:sequence>
+</xsd:complexType>
+
+<!-- Beispiel für eine Instanz des Typs -->
+<video_getUploadLimits_response>
+    <length>21</length>
+    <size>42</size>
+</video_getUploadLimits_response>
+    \end{lstlisting}
+\end{frame}

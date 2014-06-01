@@ -6,7 +6,8 @@ This is a seminar project for the course "Softwaresystemfamilien" @ Uni-Leipzig 
 
 - facebook API 1.0 [XSD](http://api.facebook.com/1.0/facebook.xsd)
 
-## todo
+## Folder structure
 
-- refactor variables with name `type` because this is a python keyword
-- refactor renderer to class
+- the python3 codegenerator is located in xsdtocls/
+- the documentation in doc/output
+- the presentation in presentation/output

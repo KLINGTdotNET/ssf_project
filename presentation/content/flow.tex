@@ -1,0 +1,52 @@
+\xdefinecolor{nearlywhite}{rgb}{0.85, 0.85, 0.85}
+
+\tikzstyle{box} = [
+    rectangle,
+    rounded corners,
+    %minimum width=3cm,
+    minimum height=10mm,
+    font=\sffamily\bfseries,
+    text centered,
+    draw=black,
+    fill=nearlywhite
+]
+
+\tikzstyle{files} = [
+    rectangle,
+    rounded corners,
+    %minimum width=3cm,
+    minimum height=10mm,
+    font=\sffamily\bfseries,
+    text centered,
+    draw=black,
+    fill=nearlywhite
+]
+
+\tikzstyle{arrow} = [
+    thick,
+    ->,
+    shorten <=1mm,
+    shorten >=1mm,
+    >=stealth   % arrowhead
+]
+
+\tikzstyle{note} = [
+    font=\sffamily\small
+]
+
+\begin{tikzpicture}[node distance=10mm]
+
+\node (xsd) [files, double copy shadow] {\textsc{Xsd}};
+\node (parser) [box, below = of xsd] {\textsc{Xml}-Parser};
+\node (schemamapper) [box, below = of parser] {Schemamapper};
+\node (classmapper) [box, below = of schemamapper] {Classmapper};
+\node (renderer) [box, below = of classmapper] {Renderer};
+\node (javaRenderer) [box, below = of renderer] {Java-Renderer};
+
+\draw [arrow] (xsd) -- (parser);
+\draw [arrow] (parser) -- node[note, anchor=west] {XML-Tree} (schemamapper);
+\draw [arrow] (schemamapper) -- node[note, anchor=west] {Schema-Model} (classmapper);
+\draw [arrow] (classmapper) -- node[note, anchor=west] {Class-Model} (renderer);
+\draw [arrow] (renderer) -- node[note, anchor=west] {Class-Model} node[note, anchor=east] {\enquote{Java}} (javaRenderer);
+
+\end{tikzpicture}

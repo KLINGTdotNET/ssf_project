@@ -1,12 +1,12 @@
 \section{Codegenerator}
 
-\myQuote{Ein Codegenerator ist ein Programm, welches aus einer höhersprachigen Spezifikation\footnote{mit anderen Worten: auf einem höheren Abstraktionslevel als das der zur Implementierung verwendetenProgrammiersprache}, einer Software oder eines Teilaspektes die Implementierung erzeugt.}{nach \cite[S. 333]{eisenecker}}
+\myQuote{Ein Codegenerator ist ein Programm, welches aus einer höhersprachigen Spezifikation\footnote{mit anderen Worten: auf einem höheren Abstraktionslevel als das der zur Implementierung verwendeten Programmiersprache}, einer Software oder eines Teilaspektes die Implementierung erzeugt.}{nach \cite[S. 333]{eisenecker}}
 
 Im Allgemeinen wird der Begriff \enquote{Generator} für verschiedene Technologien verwendet, u.a. Compiler u. Präprozessoren, Template-Metaprogramming in C++ und natürlich Codegeneratoren.
 
 Der hier beschriebene Generator erzeugt ausführbaren Code, durch die Überführung einer XML Schemabeschreibung in ein internes Datenmodell welches als Eingabe für eine Template-Engine dient (siehe \cref{sec:template} auf \pageref{sec:template}).
 
-Der Codegenerierungsprozess erfolgt dabei durch die folgenden Schritte:
+Der Codegenerierungsprozess erfolgt dabei durch die folgenden Schritte (\cref{fig:flow} auf S. \pageref{fig:flow} stellt den Ablauf schematisch dar):
 
 \begin{enumerate}
     \item Einlesen und validieren der Spezifikation (\gls{XSD})
@@ -18,7 +18,7 @@ Der Codegenerierungsprozess erfolgt dabei durch die folgenden Schritte:
 
 \begin{figure}[h]
     \centering
-    \resizebox{!}{0.8\textwidth}{
+    \resizebox{!}{0.7\textwidth}{
         \input{flow}
     }
     \caption{Ablauf des Codegenerators}
@@ -28,13 +28,13 @@ Der Codegenerierungsprozess erfolgt dabei durch die folgenden Schritte:
 \subsection{Datenmodell}
 
 Das Datenmodell beinhaltet die Informationen der Spezifikation und bildet somit die Basis für den Codegenerator.
-Vom Generator werden zwei Datenmodelle zur Erzeugung des Quellcodes verwendet, dass Schemamodell (\cref{sec:schemamodel}) und das Klassenmodell (\cref{sec:classmodel}).
+Vom Generator werden zwei Datenmodelle zur Erzeugung des Quellcodes verwendet, das Schemamodell (\cref{sec:schemamodel}) und das Klassenmodell (\cref{sec:classmodel}).
 
 \subsubsection{Schemamodell}
 \label{sec:schemamodel}
 
 Das Schemamodell kapselt die in der Spezifikation enthaltenen Informationen, in diesem Fall die Regeln aus der \gls{XSD}-Datei. Im ersten Schritt wird durch einen XML-Parser aus dem \gls{XSD} ein Objektbaum erzeugt. Gleichzeitig wird durch den Parser (lxml \cite{lxml}) geprüft ob die Spezifikation selbst wohlgeformtes \gls{XML} ist.
-Der vom Parser erzeugte Baum enthält noch viele \gls{XML} spezifische Informationen welche im folgenden \emph{mapping} Schritt wegfallen. Das \texttt{schemamapper} Modul des Codegenerators iteriert hierfür über den Objektbaum und extrahiert die relevanten Informationen, wie bspw. Element- und Typdefinitionen welche darauffolgend in das Schemamodell eingefügt werden. Das Schemamodell selbst ist ein Python \emph{Dictionary}\footnote{auch als \emph{assoziatives Array} o. \emph{Map} bezeichnet} welches Angaben über die definierten Namensräume sowie die Attribut-, Element- u. Typdefinitionen enthält.
+Der vom Parser erzeugte Baum enthält noch viele \gls{XML} spezifische Informationen, welche im folgenden \emph{mapping} Schritt wegfallen. Das \texttt{schemamapper} Modul des Codegenerators iteriert hierfür über den Objektbaum und extrahiert die relevanten Informationen, wie bspw. Element- und Typdefinitionen welche darauffolgend in das Schemamodell eingefügt werden. Das Schemamodell selbst ist ein Python \emph{Dictionary}\footnote{auch als \emph{assoziatives Array} o. \emph{Map} bezeichnet} welches Angaben über die definierten Namensräume sowie die Attribut-, Element- u. Typdefinitionen enthält.
 
 \subsubsection{Klassenmodell}
 \label{sec:classmodel}
@@ -47,7 +47,7 @@ Außerdem werden referenzierte Typen aufgelöst und durch deren Definition erset
 \subsection{Template-Engine}
 \label{sec:template}
 
-Eine Template-Engine ist ein Textersetzungssystem was Templates (Vorlagen) verarbeitet und darin enthaltene Platzhalter durch andere Inhalte ersetzt. Das \texttt{javaRenderer} Modul dieses Codegenerators verwendet dabei die \emph{Mako Template-Engine} \cite{mako}. Als Eingabe dient dabei das Klassenmodell mit welchem die Templatedateien für Element- bzw. Typdefinitionen befüllt werden. \cref{lst:javaExample} zeigt Java-Klasse welche aus der Typdefinition von \cref{lst:xsdVideoTag} generiert wurde. Das \texttt{javaRenderer} Modul übergibt der Template-Engine Methoden zur Formatierung von Klassen- und Methodennamen um bestimmte Namenskonventionen einzuhalten. In diesem Fall Methoden zur Erzeugung von \emph{camel-cased} Namen für Klassen und Methodennamen. Dies ist für die Funktionsweise nicht notwendig, unterstützt aber die Lesbarkeit und Akzeptanz des erzeugten Codes.
+Eine Template-Engine ist ein Textersetzungssystem was Templates (Vorlagen) verarbeitet und darin enthaltene Platzhalter durch andere Inhalte ersetzt. Das \texttt{javaRenderer} Modul dieses Codegenerators verwendet dabei die \emph{Mako Template-Engine} \cite{mako}. Als Eingabe dient dabei das Klassenmodell mit welchem die Templatedateien für Element- bzw. Typdefinitionen befüllt werden. \cref{lst:javaExample} zeigt eine Java-Klasse welche aus der Typdefinition von \cref{lst:xsdVideoTag} generiert wurde. Das \texttt{javaRenderer} Modul übergibt der Template-Engine Methoden zur Formatierung von Klassen- und Methodennamen um bestimmte Namenskonventionen einzuhalten. In diesem Fall Methoden zur Erzeugung von \emph{camel-cased} Namen für Klassen und Methodennamen. Dies ist für die Funktionsweise nicht notwendig, unterstützt aber die Lesbarkeit und Akzeptanz des erzeugten Codes.
 Der Name des erzeugten Java Packages wird ebenso wie die Ordnerstruktur\footnote{Nach \href{http://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html}{Maven - Standart Directory Layout}} des Projektes aus der Angabe des Zielnamensraums (targetnamespace) in der Schemadefinition erzeugt. Aus dem Zielnamensraum \texttt{http://api.facebook.com/1.0/} würde folgende Ornderstruktur generiert werden: \\
 \texttt{\%ausgabepfad\%/.api.facebook.com/1\_0/src/main/java/com/facebook/api/}.
 
