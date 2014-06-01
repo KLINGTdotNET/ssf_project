@@ -1,5 +1,6 @@
 \section{Einführung}
 
+\subsection{Idee}
 \begin{frame}{Idee}
     \begin{itemize}
         \item Codegenerator der aus einer abstrakten Datenformatbeschreibung ein Java Package erzeugt\footnote{Implementierung existiert bereits als Teil von \href{https://jaxb.java.net/}{JAXB}}
@@ -8,6 +9,7 @@
     \end{itemize}
 \end{frame}
 
+\subsection{Motivation}
 \begin{frame}[squeeze]{Motivation}
     \begin{block}{Probleme}
         \begin{itemize}
@@ -17,17 +19,28 @@
             \item \emph{Mapping} zwischen XML- und Klassendarstellung in der gewählten OO-Sprache um Daten einfach verarbeiten zu können
         \end{itemize}
     \end{block}
-        \begin{block}{Generatorlösung}
+\end{frame}
+
+\begin{frame}{Motivation}
+    \begin{block}{Generatorlösung}
         \begin{itemize}
             \item Generierung der Klassendarstellung aus \textsc{Xsd} in der gewünschten OO-Sprache (in diesem Fall Java)
             \item Erzeugen von Serialisierung- und Deserialisierungsmethoden\footnote{Werden derzeit nicht generiert.}
         \end{itemize}
-        \end{block}
+    \end{block}
 \end{frame}
 
 \subsection{XSD}
-\begin{frame}{\textsc{Xml} Schema Description \textendash{} \textsc{Xsd}}
-
+\begin{frame}[fragile]{\textsc{Xml} Schema Description \textendash{} \textsc{Xsd}}
+    \begin{itemize}
+        \item \textsc{Xml} Schema Description (kurz \textsc{Xsd} aber auch \textsc{Xml} Schema) ist eine Schemabeschreibungssprache welche Regeln enthält um den Aufbau von \textsc{Xml}-Daten zu definieren
+        \item Schemabeschreibung wird üblicherweise genutzt um XML-Daten gegen ein Schema zu validieren
+        \item \textsc{Xsd}s sind selbst gültiges XML
+        \item Es können Datentypen für \textsc{Xml}-Element und Elementattribute definiert werden
+    \end{itemize}
+    \begin{lstlisting}[language=XML, caption=Minimalbeispiel für ein XML-Element]
+<element attribut="wert">Inhalt</element>
+    \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{\textsc{Xsd} einfache Typen}

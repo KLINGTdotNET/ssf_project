@@ -1,8 +1,11 @@
 \section{Codegenerator}
-\begin{frame}
-    \begin{example}
-        \blindtext
-    \end{example}
+\begin{frame}{Codegenerator}
+    \begin{itemize}
+        \item Generator\footnote{Codegenerator u. Generator wird hier Synonym verwendet} ist in Python 3.4 implementiert
+        \item Zielsprache ist Java
+        \item Überführung der \textsc{Xml} Schemabeschreibung in internes Datenmodell welches einer Template-Engine als Eingabe dient
+        \item Änderung der Zielsprache über Anpassung der Templates
+    \end{itemize}
 \end{frame}
 
 \begin{frame}{Generatorablauf}
@@ -12,4 +15,19 @@
     }
     %\caption{Ablauf des Codegenerators}
     \label{fig:flow}
+\end{frame}
+
+\subsection{Template-Engine}
+\begin{frame}[fragile]{Template-Engine}
+    \begin{itemize}
+        \item Eine Template-Engine ist ein Textersetzungssystem welches \enquote{Templates} (Vorlagen) verarbeitet und darin enthaltene Platzhalter durch andere Inhalte ersetzt
+        \item Vom Generator wird die \href{http://www.makotemplates.org/}{Mako} Template-Engine verwendet
+    \end{itemize}
+    \begin{lstlisting}[language=Java, caption=Beispieltemplate]
+public class ${classname} {
+    ${field.modifier} ${field.type} ${field.name}
+        ${'= '+field.value if field.value else ''};
+    ...
+}
+    \end{lstlisting}
 \end{frame}

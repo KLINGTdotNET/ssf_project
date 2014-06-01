@@ -3,7 +3,7 @@
 \tikzstyle{box} = [
     rectangle,
     rounded corners,
-    %minimum width=3cm,
+    minimum width=30mm,
     minimum height=10mm,
     font=\sffamily\bfseries,
     text centered,
@@ -14,12 +14,17 @@
 \tikzstyle{files} = [
     rectangle,
     rounded corners,
-    %minimum width=3cm,
     minimum height=10mm,
     font=\sffamily\bfseries,
     text centered,
     draw=black,
     fill=nearlywhite
+]
+
+\tikzstyle{textNode} = [
+    font=\sffamily,
+    text centered,
+    align=right
 ]
 
 \tikzstyle{arrow} = [
@@ -38,9 +43,13 @@
 
 \node (xsd) [files, double copy shadow] {\textsc{Xsd}};
 \node (parser) [box, below = of xsd] {\textsc{Xml}-Parser};
+\node (parser_note) [textNode, left = of parser] {Einlesen und validieren\\der Spezifikation (XSD)};
 \node (schemamapper) [box, below = of parser] {Schemamapper};
+\node (schemamapper_note) [textNode, left = of schemamapper] {Überführen der wesentlichen Informationen\\der Spezif. in Schemamodell};
 \node (classmapper) [box, below = of schemamapper] {Classmapper};
+\node (classmapper_note) [textNode, left = of classmapper] {Klassenmodell (Eingabe der Template-Engine)\\mit Inhalten des Schemamodells befüllen\\Serialisierer erstellen \& Abhängigkeiten analysieren};
 \node (renderer) [box, below = of classmapper] {Renderer};
+\node (renderer_note) [textNode, left = of renderer] {Rendern des Quellcodes durch Template-Engine};
 \node (javaRenderer) [box, below = of renderer] {Java-Renderer};
 
 \draw [arrow] (xsd) -- (parser);
