@@ -16,7 +16,6 @@
 \setdefaultlanguage{german}
 \setotherlanguage{english}
 \usepackage{csquotes}
-\usepackage{graphicx}
 
 \usepackage{xcolor}
 \xdefinecolor{linkcolor}{rgb}{0.1,0.1,0.3}
@@ -33,7 +32,6 @@
 }
 
 \usepackage{listings}
-\setmonofont[Scale=0.9]{Droid Sans Mono}
 \lstset{
         basicstyle=\small\ttfamily,
         numbers=left,
@@ -56,14 +54,15 @@
 \usepackage[toc]{glossaries}
 \makeglossaries
 
-%
-% Style options
-%
+% style options
 
 \setsansfont{Linux Biolinum}
-\setmonofont{Droid Sans Mono}
+\setmonofont[Scale=0.9]{Droid Sans Mono}
 
-%
+% graphics
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, shadows, positioning}
+
 % custom commands
-%
 \newcommand{\myQuote}[2]{\begin{quote}\textsl{#1\qquad(#2)}\end{quote}}
