@@ -59,6 +59,19 @@ public class ${classname} {
     \end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]{Beispieldefinition für generierte Klasse}
+    \begin{lstlisting}[language=XML, label=lst:xsdVideoTag, caption=Beispieldefinition für generierte Klasse von \Cref{lst:javaExample} (aus \cite{facebookXSD})]
+    <xsd:complexType name="video_tag">
+      <xsd:sequence>
+        <xsd:element name="vid" type="vid" />
+        <xsd:element name="subject" type="uid" />
+        <xsd:element name="created_time" type="time" />
+        <xsd:element name="updated_time" type="time" />
+      </xsd:sequence>
+    </xsd:complexType>
+    \end{lstlisting}
+\end{frame}
+
 \begin{frame}[fragile]{Beispiel für generierte Klasse}
     \begin{adjustbox}{height=0.4\textheight,keepaspectratio}
         \begin{lstlisting}[language=Java, label=lst:javaExample, caption=Beispiel für eine generierte Java-Datei (gekürzt)]

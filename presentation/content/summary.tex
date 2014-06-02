@@ -1,4 +1,41 @@
-\section{Zusammenfassung}
-\begin{frame}{Fazit}
+\section{Schlussbetrachtung}
+\subsection{Alternative zur Template-Engine}
+\begin{frame}{Erweiterungs- und Verbesserungsmöglichkeiten}
+    \begin{block}{Alternative zur Template-Engine}
+        \begin{itemize}
+            \item Implementierung eines Sprachenmodells welches die Konstrukte der Zielsprache abbilden kann (Expressions, Statements, Conditions, Loops, \ldots)
+            \item Sprachenmodell würde zu erzeugenden Code als \emph{Abstract Syntax Tree} enthalten
+            \item Sprachenmodell würde Semantik und ein Rendermodul die Syntax kapseln
+            \item Vorteile:
+            \begin{itemize}
+                \item Erweiterung um zusätzliche Zielsprachen durch Implementierung weiterer Rendermodules
+                \item Formatierung des erzeugten Codes über Parameter änderbar (Einrückungstiefe, Klammerpositionen, \ldots)
+                \item Optimierung des zu erzeugenden Codes durch Analyse des \textsc{Ast}
+            \end{itemize}
+        \end{itemize}
+    \end{block}
+\end{frame}
 
+\subsection{Generatorsystem}
+\begin{frame}
+    \begin{block}{WADL}
+        \begin{itemize}
+            \item Generieren einer gesamten Client-Bibliothek für einen \textsc{Rest}ful Webservice
+            \item Nutzung einer kompletten maschinenlesbare Beschreibung des Webservice als \textsc{Wadl} (Web Application Description Language) in Verbindung mit \textsc{Xsd}
+            \item Generatorsystem bestehend aus:
+            \begin{itemize}
+                \item Codegenerator der Bibliothek für Zugriff auf Webserviceressourcen generiert
+                \item Generator zur Erstellung der Datenklassen aus \textsc{Xsd}\footnote{analog dem hier vorgestellten Generator}
+            \end{itemize}
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\subsection{Fazit}
+\begin{frame}{Fazit}
+    \begin{itemize}
+        \item bildet derzeit nicht alle in \textsc{Xsd} erlaubten Regeln ab (sehr komplexe Typdefinitionen möglich, Anonyme Typen, \ldots)
+        \item mit überschaubaren Änderungen produktiv einsetzbar
+        \item Vertiefung der Kenntnisse im Umgang mit Template-Engines und XML-Bibliotheken in Python3
+    \end{itemize}
 \end{frame}
