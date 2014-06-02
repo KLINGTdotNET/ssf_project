@@ -9,7 +9,7 @@ COMPILER=xelatex
 DOCUMENT=presentation
 DOCUMENT169=presentation169
 PASS_ONE='-halt-on-error -no-pdf'
-PASSES='-halt-on-error'
+PASSES='-halt-on-error"'
 
 if [[ -d $BUILDDIR ]]; then
     # change working directory, thanks to http://stackoverflow.com/a/10386924/1706750
