@@ -6,7 +6,7 @@ Das Projekt diente hauptsächlich dazu sich mit dem Thema Codegenerierung in Pyt
 \subsection{Erweiterungsmöglichkeiten}
 \label{sec:extension}
 
-Wie in \cref{sec:motivation} (S. \pageref{sec:motivation}) erwähnt ist der Einsatzzweck eines solchen Generators optimalerweise als Teil eines Generatorsystems zu sehen, welches aus einer kompletten Beschreibung eines \gls{RESTful} Webservice in Form von \gls{WADL}- und \gls{XSD}-Dateien eine Client-Bibliothek erzeugt. Mit einem solchen Generatorsystem kann man bei Änderungen an der Webservice-API eine neue Client-Bibliothek generieren die den Zugriff auf alle Ressourcen erlaubt ohne das der Nutzer sich mit Details der Kommunikation auseinandersetzen muss. % näher erläutern
+Wie in \cref{sec:motivation} (S. \pageref{sec:motivation}) erwähnt ist der Einsatzzweck eines solchen Generators optimalerweise als Teil eines Generatorsystems zu sehen, welches aus einer kompletten Beschreibung eines \gls{REST} Webservice in Form von \gls{WADL}- und \gls{XSD}-Dateien eine Client-Bibliothek erzeugt. Mit einem solchen Generatorsystem kann man bei Änderungen an der Webservice-API eine neue Client-Bibliothek generieren die den Zugriff auf alle Ressourcen erlaubt ohne das der Nutzer sich mit Details der Kommunikation auseinandersetzen muss. % näher erläutern
 
 Um das erzeugte Java Paket sinnvoll nutzen zu können sollten noch Deserialisierungsmethoden generiert werden, die die Typklassen direkt aus der XML-Darstellung initialisieren. Zustätzlich sollten noch mehrere Aspekte der XML Schemadefinition bei der Generierung berücksichtigt werden, wie anonyme Typdefinitionen, die man als z.B. Innere Klassen generieren könnte.
 
